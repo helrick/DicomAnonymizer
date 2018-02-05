@@ -17,11 +17,11 @@ class MyForm(wx.Frame):
         selectDirsButton.Bind(wx.EVT_BUTTON, self.onSelectDirs)
 
     def onSelectDirs(self, event):
-        dlg = MDD.MultiDirDialog(self, title="Choose folder(s):", defaultPath=self.currentDirectory, agwStyle=0)
+        dlg = MDD.MultiDirDialog(self, title="Choose source folder", defaultPath=self.currentDirectory, agwStyle=0)
         
         if dlg.ShowModal() == wx.ID_OK:
             paths = dlg.GetPaths()
-            print "Selected file(s):"
+            print "Source folder selected:"
             for path in paths:
                 print path
         dlg.Destroy()
