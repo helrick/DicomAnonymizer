@@ -9,7 +9,7 @@ Stores a library of Patients for display to windows
 import dicom
 import os
 import magic
-from Patient import Patient
+
 
 class PatientLibrary():
 
@@ -36,10 +36,12 @@ class PatientLibrary():
         #if new -> create Patient object, add initial
         #dicom object to Patient, add Patient to dict
 
+        from Patient import Patient
 
         for root, directories, filenames in os.walk(self.sourceDir):
             for filename in filenames:
                 filePath = os.path.join(root, filename)
+
 
                 #determines MIME file type with magic library
                 type = magic.from_file(filePath)
@@ -58,15 +60,19 @@ class PatientLibrary():
                         self.PatientObjects[pName] = patient
 
     def testLibrary(self):
-        for name, value in self.PatientObjects:
+        import os.path
+        for name, value in self.PatientObjects.iteritems():
             print name
-            for f in value.unusedFiles:
-                print f.filename
+            files = value.unusedFiles
+            for f in files:
+                print os.path.basename(os.path.normpath(f.filename))
+
+
 
 def main():
 
     #to test
-    path = input("Enter dir path")
+    path = input("Enter dir path: ")   
     pLib = PatientLibrary(path)
     pLib.populatePatientLibrary()
     pLib.testLibrary()

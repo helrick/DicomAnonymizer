@@ -20,7 +20,7 @@ class Patient(PatientLibrary):
         self.usedFiles = []
         
         #initialize the Patient data attributes to be anonymized
-        self.unAnon_PatientsName = ds.PatientsName
+        self.unAnon_PatientsName = dcmObject.PatientsName
 
     #TODO: delete?
     #only pass if the file has been confirmed to have the same patient name
@@ -71,7 +71,9 @@ class Patient(PatientLibrary):
                 dcmObject.PatientsName = newPatientsName
             #must also change other tags and export to source (overwriting originals)
         '''
-        
+
+    #TODO: write this, comment out for now since errors
+    '''
     def anonymizeUsedFiles(self):
         #TODO: write code for anonymization of all tags
         #first implement with obvious ones,
@@ -80,3 +82,11 @@ class Patient(PatientLibrary):
             #go through each tag that needs to be anonymized on every object
         
         
+    '''
+
+def main():
+    print "here"
+    #nothing here
+
+if __name__ == "__main__":
+    main()

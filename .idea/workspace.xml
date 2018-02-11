@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="061915a3-48e7-4060-97a7-de2efe278113" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/src/Patient.py" afterPath="$PROJECT_DIR$/src/Patient.py" />
+      <change beforePath="$PROJECT_DIR$/src/PatientSelector.py" afterPath="$PROJECT_DIR$/src/PatientSelector.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -35,18 +36,18 @@
                 <state relative-caret-position="0">
                   <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
                   <folding>
-                    <marker date="1518330021000" expanded="true" signature="455:804" ph="..." />
-                    <marker date="1518330021000" expanded="true" signature="804:813" ph="..." />
+                    <marker date="1518332698000" expanded="true" signature="428:777" ph="..." />
+                    <marker date="1518332698000" expanded="true" signature="777:786" ph="..." />
                   </folding>
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="Patient.py" pinned="false" current-in-tab="false">
+          <file leaf-file-name="Patient.py" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/src/Patient.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="840">
-                  <caret line="56" column="19" lean-forward="false" selection-start-line="56" selection-start-column="19" selection-end-line="56" selection-end-column="19" />
+                <state relative-caret-position="480">
+                  <caret line="32" column="39" lean-forward="true" selection-start-line="32" selection-start-column="39" selection-end-line="32" selection-end-column="39" />
                   <folding>
                     <element signature="e#145#157#0" expanded="true" />
                   </folding>
@@ -54,11 +55,11 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="anonymizeFiles.py" pinned="false" current-in-tab="true">
+          <file leaf-file-name="anonymizeFiles.py" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/scripts/anonymizeFiles.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="508">
-                  <caret line="56" column="0" lean-forward="true" selection-start-line="56" selection-start-column="0" selection-end-line="56" selection-end-column="0" />
+                <state relative-caret-position="196">
+                  <caret line="14" column="40" lean-forward="false" selection-start-line="14" selection-start-column="40" selection-end-line="14" selection-end-column="40" />
                   <folding>
                     <element signature="e#113#125#0" expanded="true" />
                   </folding>
@@ -73,8 +74,8 @@
           <file leaf-file-name="PatientSelector.py" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/src/PatientSelector.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="613">
-                  <caret line="74" column="9" lean-forward="false" selection-start-line="74" selection-start-column="9" selection-end-line="74" selection-end-column="9" />
+                <state relative-caret-position="490">
+                  <caret line="74" column="38" lean-forward="false" selection-start-line="74" selection-start-column="38" selection-end-line="74" selection-end-column="38" />
                   <folding>
                     <element signature="e#269#281#0" expanded="true" />
                   </folding>
@@ -252,30 +253,30 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Patient.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="840">
-          <caret line="56" column="19" lean-forward="false" selection-start-line="56" selection-start-column="19" selection-end-line="56" selection-end-column="19" />
-          <folding>
-            <element signature="e#145#157#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/scripts/anonymizeFiles.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="508">
-          <caret line="56" column="0" lean-forward="true" selection-start-line="56" selection-start-column="0" selection-end-line="56" selection-end-column="0" />
+        <state relative-caret-position="196">
+          <caret line="14" column="40" lean-forward="false" selection-start-line="14" selection-start-column="40" selection-end-line="14" selection-end-column="40" />
           <folding>
             <element signature="e#113#125#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/Patient.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="480">
+          <caret line="32" column="39" lean-forward="true" selection-start-line="32" selection-start-column="39" selection-end-line="32" selection-end-column="39" />
+          <folding>
+            <element signature="e#145#157#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/PatientSelector.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="613">
-          <caret line="74" column="9" lean-forward="false" selection-start-line="74" selection-start-column="9" selection-end-line="74" selection-end-column="9" />
+        <state relative-caret-position="490">
+          <caret line="74" column="38" lean-forward="false" selection-start-line="74" selection-start-column="38" selection-end-line="74" selection-end-column="38" />
           <folding>
             <element signature="e#269#281#0" expanded="true" />
           </folding>
