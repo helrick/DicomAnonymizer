@@ -72,7 +72,7 @@ class PatientLibrary():
 def main():
 
     #to test
-    path = input("Enter dir path: ")   
+    path = input("Enter dir path: ")
     pLib = PatientLibrary(path)
     pLib.populatePatientLibrary()
     pLib.testLibrary()
