@@ -51,13 +51,16 @@ class PatientLibrary():
                 if 'DICOM' in type:
                     ds = dicom.read_file(filePath)
                     pName = ds.PatientsName
+                    pBday = ds.PatientBirthDate
+
+                    pIdent = pName+pBday
                     #if patient already seen, add ds to Patient
-                    if pName in self.PatientObjects:
-                        self.PatientObjects[pName].add_dicomObject(ds)
+                    if pIdent in self.PatientObjects:
+                        self.PatientObjects[pIdent].add_dicomObject(ds)
                     #if unseen patient name, create new Patient with ds
                     else:
                         patient = Patient(ds)
-                        self.PatientObjects[pName] = patient
+                        self.PatientObjects[pIdent] = patient
 
     def testLibrary(self):
         import os.path

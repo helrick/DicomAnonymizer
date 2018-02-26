@@ -29,7 +29,7 @@ class SelectFilesWindow(wx.Frame):
         patientFileLists = []
         count = 0
         for name, value in pLib.PatientObjects.iteritems():
-            patientText.append(wx.StaticText(panel, pos=(10,((count*125)+15)), label=name))
+            patientText.append(wx.StaticText(panel, pos=(10,((count*125)+15)), label=value.unAnon_PatientsName))
             files = value.unusedFiles
             fileNames = []
             for f in files:
@@ -37,6 +37,9 @@ class SelectFilesWindow(wx.Frame):
             patientFileLists.append(wx.ListBox(panel, pos=(10,((count*125)+30)),
                                                size=(300,100), choices=fileNames))
             count = count+1
+
+        
+
         self.Show(True)
 
 
