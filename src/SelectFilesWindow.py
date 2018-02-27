@@ -19,27 +19,27 @@ class SelectFilesWindow(wx.Frame):
         self.Maximize(True)
         self.panel = wx.Panel(self)
 
-        #self.image = wx.StaticText(self.panel,pos=(10,0),label='')
         self.imagePanel = wx.Panel(self.panel, pos=(400,10))
         self.imagePanel.Show()
         self.xrayImage = wx.StaticBitmap()
         self.selectImage = wx.Button()
-        self.currentDICOMObject = None
-        self.currentPatient = None
+        self.CurrentDICOMObject = None
+        self.CurrentPatient = None
 
+        self.LeftPatientText = []
+        self.LeftPatientFileLists = []
+
+        self.RightPatientText = []
+        self.RightPatientFileLists = []
 
         self.showUnusedFiles()
+        self.showUsedFiles()
 
 
 
     def showUnusedFiles(self):
-        #panel = wx.Panel(self)
-        #idea: for each patient, print their name, then make a listbox for each patient
-        #inside the listbox have all the files associated with that patient
-        #pLib = createLibrary()
-
-        patientText = []
-        patientFileLists = []
+        self.LeftPatientText = []
+        self.LeftPatientFileLists = []
         count = 0
         '''
         patientName = wx.StaticText(panel, pos=(10,15), label="John Doe")
@@ -49,41 +49,51 @@ class SelectFilesWindow(wx.Frame):
         '''
         for name, value in self.patientLib.PatientObjects.iteritems():
             pName = value.unAnon_PatientsName
-            patientText.append(wx.StaticText(self.panel, pos=(10,((count*125)+15)), label=pName))
+            self.LeftPatientText.append(wx.StaticText(self.panel, pos=(10, ((count * 125) + 15)), label=pName))
+
             #gets all the unusedFiles from each patient
             files = value.unusedFiles
             fileNames = []
             lb = wx.ListBox(self.panel, pos=(10, ((count * 125) + 30)), size=(300, 100), choices=fileNames)
             for f in files:
                 lb.Append(os.path.basename(os.path.normpath(f.filename)), value)
-                #fileNames.append(os.path.basename(os.path.normpath(f.filename)) + '-' + name)
-            patientFileLists.append(lb)
-            #patientFileLists.append(wx.ListBox(self.panel, pos=(10,((count*125)+30)),
-            #                                   size=(300,100), choices=fileNames))
+            self.LeftPatientFileLists.append(lb)
             count = count+1
             lb.Bind(wx.EVT_LISTBOX, self.displayImage)
 
-        #self.Bind(wx.EVT_LISTBOX,self.displayImage)
 
         self.Show(True)
 
-    def displayImage(self, event):
-        obj = event.GetClientData()
-        self.CurrentPatient = obj
-        imgName = event.GetString()
-        #self.image.SetLabel(obj.unAnon_PatientsName + imgName)
-        ds = ''
-        #get the pydicom object
-        for dcmObject in obj.unusedFiles:
-            if (os.path.basename(os.path.normpath(dcmObject.filename)) == imgName):
-                ds = dcmObject
-                self.currentDICOMObject = ds
+    def showUsedFiles(self):
+        self.RightPatientText = []
+        self.RightPatientText = []
+        count = 0
+        for name, value in self.patientLib.PatientObjects.iteritems():
+            pName = value.unAnon_PatientsName
+            self.RightPatientText.append(wx.StaticText(self.panel, pos=(950, ((count * 125) + 15)), label=pName))
 
-        #self.image.SetLabel(ds.PatientAddress)
+            #gets usedFiles from each patient
+            files = value.usedFiles
+            fileNames = []
+            rlb = wx.ListBox(self.panel, pos=(950, ((count * 125) + 30)), size=(300, 100), choices=fileNames)
+            for f in files:
+                rlb.Append(os.path.basename(os.path.normpath(f.filename)), value)
+            self.RightPatientFileLists.append(rlb)
+            count = count+1
+            #lb.Bind(wx.EVT_LISTBOX, self.displayImage)
+
+
+    def displayImage(self, event):
+        self.CurrentPatient = event.GetClientData()
+        imgName = event.GetString()
+
+        #get the pydicom object
+        for dcmObject in self.CurrentPatient.unusedFiles:
+            if (os.path.basename(os.path.normpath(dcmObject.filename)) == imgName):
+                self.CurrentDICOMObject = dcmObject
 
         from matplotlib import pyplot
-        import matplotlib
-        pyplot.imshow(ds.pixel_array, cmap=pyplot.cm.bone)
+        pyplot.imshow(self.CurrentDICOMObject.pixel_array, cmap=pyplot.cm.bone)
         pyplot.axis('off')
 
         pyplot.savefig('tempfile.png', bbox_inches = 'tight', pad_inches=0.0)
@@ -91,41 +101,39 @@ class SelectFilesWindow(wx.Frame):
         i.Resize(size=(500,500),pos=(0,0),red=255, green=255, blue=255)
         png = i.ConvertToBitmap()
 
-        #wx.StaticBitmap(self.panel, -1, png, (400, 10), (500, 500))
-        self.xrayImage = wx.StaticBitmap(self.panel,-1,png,(400, 10), (500,500))
-        self.selectImage = wx.Button(self.panel, pos=(640,520), label="Select Image")
+        # checks that the image and button are properly destroyed before deleting
+        if self.xrayImage:
+            self.xrayImage.Destroy()
+
+        self.selectImage = wx.Button(self.panel, pos=(600,520), label="Select Image")
+
+        self.xrayImage = wx.StaticBitmap(self.panel,-1,png,(380, 10), (500,500))
         self.selectImage.Bind(wx.EVT_BUTTON, self.chooseImage)
 
 
-        #self.imagePanel.Show()
-        '''
-        import tempfile
-        with tempfile.TemporaryFile(suffix=".png") as tmpfile:
-            pyplot.savefig(tmpfile, format="png")
-            tmpfile.seek(0)
-            import base64
-            print base64.b64encode(tmpfile.read())
-            im = wx.Image(tempfile)
-            im.Show()
-             
-        print ds.Rows
-        print ds.Columns
-        image = wx.Image(ds.Columns,ds.Rows)
-        image.SetData( (ds.pixel_array).tostring())
-        image.Show()
-        #bitmap = wx.Image(ds.Rows, ds.Columns, ds.pixel_array)
-        #bitmap.Show()
-        
-        
 
-        #image = wx.StaticText(self.panel,pos=(10,0),label=obj.unAnon_PatientsName)
-        #image = wx.StaticText(self.panel, pos=(10, 0), label=event.GetString())
-        #image.Show(True)
-        '''
 
     def chooseImage(self, event):
-        self.CurrentPatient.unusedFiles.remove(self.currentDICOMObject)
+        # adds selected file to usedFiles list
+        self.CurrentPatient.usedFiles.append(self.CurrentDICOMObject)
+        # removes the selected image from the unused files
+        self.CurrentPatient.unusedFiles.remove(self.CurrentDICOMObject)
+
+        # destroys the existing listboxes, buttons, and text printed to the screen
+        for leftnameText in self.LeftPatientText:
+            leftnameText.Destroy()
+        for leftlistBox in self.LeftPatientFileLists:
+            leftlistBox.Destroy()
+
+        for rightnameText in self.RightPatientText:
+            rightnameText.Destroy()
+        for rightlistBox in self.RightPatientFileLists:
+            if rightlistBox: # not exactly sure why this works...
+                rightlistBox.Destroy()
+
+        # reprints the new unused files and patients
         self.showUnusedFiles()
+        self.showUsedFiles()
 
 
 
