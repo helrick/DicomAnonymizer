@@ -19,7 +19,14 @@ class SelectFilesWindow(wx.Frame):
         self.Maximize(True)
         self.panel = wx.Panel(self)
 
-        self.image = wx.StaticText(self.panel,pos=(10,0),label='')
+        #self.image = wx.StaticText(self.panel,pos=(10,0),label='')
+        self.imagePanel = wx.Panel(self.panel, pos=(400,10))
+        self.imagePanel.Show()
+        self.xrayImage = wx.StaticBitmap()
+        self.selectImage = wx.Button()
+        self.currentDICOMObject = None
+        self.currentPatient = None
+
 
         self.showUnusedFiles()
 
@@ -62,27 +69,35 @@ class SelectFilesWindow(wx.Frame):
 
     def displayImage(self, event):
         obj = event.GetClientData()
+        self.CurrentPatient = obj
         imgName = event.GetString()
-        self.image.SetLabel(obj.unAnon_PatientsName + imgName)
+        #self.image.SetLabel(obj.unAnon_PatientsName + imgName)
         ds = ''
         #get the pydicom object
         for dcmObject in obj.unusedFiles:
             if (os.path.basename(os.path.normpath(dcmObject.filename)) == imgName):
                 ds = dcmObject
+                self.currentDICOMObject = ds
 
-        self.image.SetLabel(ds.PatientAddress)
+        #self.image.SetLabel(ds.PatientAddress)
 
         from matplotlib import pyplot
         import matplotlib
         pyplot.imshow(ds.pixel_array, cmap=pyplot.cm.bone)
         pyplot.axis('off')
 
-
-
         pyplot.savefig('tempfile.png', bbox_inches = 'tight', pad_inches=0.0)
-        i = wx.Image('testfile.png', 'image/png', -1)
+        i = wx.Image('tempfile.png', 'image/png', -1)
+        i.Resize(size=(500,500),pos=(0,0),red=255, green=255, blue=255)
         png = i.ConvertToBitmap()
-        wx.StaticBitmap(self, -1, png, (400, 10), (png.GetWidth(), png.GetHeight()))
+
+        #wx.StaticBitmap(self.panel, -1, png, (400, 10), (500, 500))
+        self.xrayImage = wx.StaticBitmap(self.panel,-1,png,(400, 10), (500,500))
+        self.selectImage = wx.Button(self.panel, pos=(640,520), label="Select Image")
+        self.selectImage.Bind(wx.EVT_BUTTON, self.chooseImage)
+
+
+        #self.imagePanel.Show()
         '''
         import tempfile
         with tempfile.TemporaryFile(suffix=".png") as tmpfile:
@@ -108,6 +123,12 @@ class SelectFilesWindow(wx.Frame):
         #image.Show(True)
         '''
 
+    def chooseImage(self, event):
+        self.CurrentPatient.unusedFiles.remove(self.currentDICOMObject)
+        self.showUnusedFiles()
+
+
+
 def createLibrary():
     patientLib = PatientLibrary(path)
     patientLib.populatePatientLibrary()
@@ -117,7 +138,7 @@ def createLibrary():
 def main():
     app = wx.App()
     
-    SelectFilesWindow(None, title="Select Files to Anonymize", )
+    SelectFilesWindow(None, title="Select Files to Anonymize" )
     app.MainLoop()
 
 main()
