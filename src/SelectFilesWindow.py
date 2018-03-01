@@ -23,6 +23,10 @@ class SelectFilesWindow(wx.Frame):
         self.imagePanel.Show()
         self.xrayImage = wx.StaticBitmap()
         self.selectImage = wx.Button()
+
+        self.classifyPreop = wx.Button()
+        self.classifyPostop = wx.Button()
+
         self.CurrentDICOMObject = None
         self.CurrentPatient = None
 
@@ -34,6 +38,8 @@ class SelectFilesWindow(wx.Frame):
 
         self.showUnusedFiles()
         self.showUsedFiles()
+
+        self.TestText = wx.StaticText(self.panel, pos=(600,600))
 
 
 
@@ -107,10 +113,32 @@ class SelectFilesWindow(wx.Frame):
 
         self.selectImage = wx.Button(self.panel, pos=(600,520), label="Select Image")
 
+        self.classifyPreop = wx.Button(self.panel, pos=(600, 550), label="Label Pre-Op")
+        self.classifyPostop = wx.Button(self.panel, pos=(598, 570), label="Label Post-Op")
+
         self.xrayImage = wx.StaticBitmap(self.panel,-1,png,(380, 10), (500,500))
+
+        # EVENT HANDLERS
         self.selectImage.Bind(wx.EVT_BUTTON, self.chooseImage)
+        self.classifyPreop.Bind(wx.EVT_BUTTON, self.markPreop)
+        self.classifyPostop.Bind(wx.EVT_BUTTON, self.markPostop)
+
+    def markPreop(self, event):
+        # if the current file is already mark post op, remove it from that list
+        if self.CurrentDICOMObject in self.CurrentPatient.postopFiles:
+            self.CurrentPatient.postopFiles.remove(self.CurrentDICOMObject)
+
+        # add the file to the preop list if it's not already there
+        if self.CurrentDICOMObject not in self.CurrentPatient.preopFiles:
+            self.CurrentPatient.preopFiles.append(self.CurrentDICOMObject)
 
 
+    def markPostop(self, event):
+        if self.CurrentDICOMObject in self.CurrentPatient.preopFiles:
+            self.CurrentPatient.preopFiles.remove(self.CurrentDICOMObject)
+
+        if self.CurrentDICOMObject not in self.CurrentPatient.postopFiles:
+            self.CurrentPatient.postopFiles.append(self.CurrentDICOMObject)
 
 
     def chooseImage(self, event):
@@ -134,6 +162,7 @@ class SelectFilesWindow(wx.Frame):
         # reprints the new unused files and patients
         self.showUnusedFiles()
         self.showUsedFiles()
+
 
 
 

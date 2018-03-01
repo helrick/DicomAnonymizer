@@ -18,6 +18,9 @@ class Patient(PatientLibrary):
         #usedFiles will be anonymized and exported
         self.unusedFiles = [dcmObject]
         self.usedFiles = []
+
+        self.preopFiles = []
+        self.postopFiles = []
         
         #initialize the Patient data attributes to be anonymized
         self.unAnon_PatientsName = dcmObject.PatientsName
@@ -71,6 +74,8 @@ class Patient(PatientLibrary):
                 dcmObject.PatientsName = newPatientsName
             #must also change other tags and export to source (overwriting originals)
         '''
+
+
 
     #TODO: write this, comment out for now since errors
     '''
