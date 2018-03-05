@@ -8,7 +8,7 @@ import wx
 import os.path
 from PatientSelector import PatientLibrary
 
-#temporary solution, this should be passed from file dialog
+# temporary solution, this should be passed from file dialog
 path = "/Users/hillary/Documents/School/4th_Year/Winter2018/CISC499/test-data"
 
 class SelectFilesWindow(wx.Frame):
@@ -68,7 +68,7 @@ class SelectFilesWindow(wx.Frame):
             pName = value.unAnon_PatientsName
             self.LeftPatientText.append(wx.StaticText(self.panel, pos=(10, ((count * 125) + 15)), label=pName))
 
-            #gets all the unusedFiles from each patient
+            # gets all the unusedFiles from each patient
             files = value.unusedFiles
             fileNames = []
             lb = wx.ListBox(self.panel, pos=(10, ((count * 125) + 30)), size=(300, 100), choices=fileNames)
@@ -77,7 +77,6 @@ class SelectFilesWindow(wx.Frame):
             self.LeftPatientFileLists.append(lb)
             count = count+1
             lb.Bind(wx.EVT_LISTBOX, self.displayImage)
-
 
         self.Show(True)
 
@@ -89,7 +88,7 @@ class SelectFilesWindow(wx.Frame):
             pName = value.unAnon_PatientsName
             self.RightPatientText.append(wx.StaticText(self.panel, pos=(950, ((count * 125) + 15)), label=pName))
 
-            #gets usedFiles from each patient
+            # gets usedFiles from each patient
             files = value.usedFiles
             fileNames = []
             rlb = wx.ListBox(self.panel, pos=(950, ((count * 125) + 30)), size=(300, 100), choices=fileNames)
@@ -97,14 +96,12 @@ class SelectFilesWindow(wx.Frame):
                 rlb.Append(os.path.basename(os.path.normpath(f.filename)), value)
             self.RightPatientFileLists.append(rlb)
             count = count+1
-            #lb.Bind(wx.EVT_LISTBOX, self.displayImage)
-
 
     def displayImage(self, event):
         self.CurrentPatient = event.GetClientData()
         imgName = event.GetString()
 
-        #get the pydicom object
+        # get the pydicom object
         for dcmObject in self.CurrentPatient.unusedFiles:
             if (os.path.basename(os.path.normpath(dcmObject.filename)) == imgName):
                 self.CurrentDICOMObject = dcmObject
@@ -121,14 +118,10 @@ class SelectFilesWindow(wx.Frame):
         # checks that the image and button are properly destroyed before deleting
         if self.xrayImage:
             self.xrayImage.Destroy()
-
-        #self.selectImage = wx.Button(self.panel, pos=(600,520), label="Select Image")
-        if(self.selectImage.IsShown() == False):
+        if not self.selectImage.IsShown():
             self.selectImage.Show()
         self.classifyPreop.Show()
         self.classifyPostop.Show()
-
-
 
         self.xrayImage = wx.StaticBitmap(self.panel,-1,png,(380, 10), (500,500))
 
@@ -148,14 +141,12 @@ class SelectFilesWindow(wx.Frame):
         if self.CurrentDICOMObject not in self.CurrentPatient.preopFiles:
             self.CurrentPatient.preopFiles.append(self.CurrentDICOMObject)
 
-
     def markPostop(self, event):
         if self.CurrentDICOMObject in self.CurrentPatient.preopFiles:
             self.CurrentPatient.preopFiles.remove(self.CurrentDICOMObject)
 
         if self.CurrentDICOMObject not in self.CurrentPatient.postopFiles:
             self.CurrentPatient.postopFiles.append(self.CurrentDICOMObject)
-
 
     def chooseImage(self, event):
         # adds selected file to usedFiles list
@@ -178,8 +169,6 @@ class SelectFilesWindow(wx.Frame):
         # reprints the new unused files and patients
         self.showUnusedFiles()
         self.showUsedFiles()
-
-
 
 
 def createLibrary():
