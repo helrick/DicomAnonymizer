@@ -22,10 +22,21 @@ class SelectFilesWindow(wx.Frame):
         self.imagePanel = wx.Panel(self.panel, pos=(400,10))
         self.imagePanel.Show()
         self.xrayImage = wx.StaticBitmap()
-        self.selectImage = wx.Button()
 
-        self.classifyPreop = wx.Button()
-        self.classifyPostop = wx.Button()
+        # Initialize Buttons
+        self.selectImage = wx.Button(self.panel, pos=(600,520), label="Select Image")
+        self.classifyPreop = wx.Button(self.panel, pos=(600, 550), label="Label Pre-Op")
+        self.classifyPostop = wx.Button(self.panel, pos=(598, 570), label="Label Post-Op")
+
+        # Hide Buttons
+        self.selectImage.Hide()
+        self.classifyPreop.Hide()
+        self.classifyPostop.Hide()
+
+        # EVENT HANDLERS
+        self.selectImage.Bind(wx.EVT_BUTTON, self.chooseImage)
+        self.classifyPreop.Bind(wx.EVT_BUTTON, self.markPreop)
+        self.classifyPostop.Bind(wx.EVT_BUTTON, self.markPostop)
 
         self.CurrentDICOMObject = None
         self.CurrentPatient = None
@@ -111,17 +122,22 @@ class SelectFilesWindow(wx.Frame):
         if self.xrayImage:
             self.xrayImage.Destroy()
 
-        self.selectImage = wx.Button(self.panel, pos=(600,520), label="Select Image")
+        #self.selectImage = wx.Button(self.panel, pos=(600,520), label="Select Image")
+        if(self.selectImage.IsShown() == False):
+            self.selectImage.Show()
+        self.classifyPreop.Show()
+        self.classifyPostop.Show()
 
-        self.classifyPreop = wx.Button(self.panel, pos=(600, 550), label="Label Pre-Op")
-        self.classifyPostop = wx.Button(self.panel, pos=(598, 570), label="Label Post-Op")
+
 
         self.xrayImage = wx.StaticBitmap(self.panel,-1,png,(380, 10), (500,500))
 
         # EVENT HANDLERS
+        '''
         self.selectImage.Bind(wx.EVT_BUTTON, self.chooseImage)
         self.classifyPreop.Bind(wx.EVT_BUTTON, self.markPreop)
         self.classifyPostop.Bind(wx.EVT_BUTTON, self.markPostop)
+        '''
 
     def markPreop(self, event):
         # if the current file is already mark post op, remove it from that list
