@@ -289,37 +289,39 @@ class AnonymizeFiles(wx.Frame):
     def __init__(self, *args, **kwargs):
         super(AnonymizeFiles, self).__init__(*args, **kwargs)
         global patientLib
-
-
-
+        self.Maximize(True)
         self.panel = wx.Panel(self)
-
         self.WindowSize = self.GetSize()
 
         self.filePanel = sp.ScrolledPanel(self.panel, size=(self.WindowSize[0] / 4, self.WindowSize[1] - 20))
-        self.filePanel.SetBackgroundColour((300,300,300))
+        self.filePanel.SetupScrolling()
+        self.filePanel.SetBackgroundColour((200,200,200))
+
+        self.infoPanel = wx.Panel(self.panel)
+        self.infoPanel.SetBackgroundColour((100,200,200))
+        self.infoPanel.Show()
 
         for name, value in patientLib.PatientObjects.iteritems():
             print (value.unAnon_PatientsName)
 
-        self.fileSizer = wx.BoxSizer( wx.VERTICAL)
-        self.filePanel.SetSizer(self.fileSizer)
-
         self.SelectedPatients = []
         self.SelectedPatientFiles = []
 
-        self.showSelectedFiles()
+        self.fileSizer = wx.BoxSizer( wx.VERTICAL)
+        self.filePanel.SetSizer(self.fileSizer)
+
+        #self.infoSizer = wx.BoxSizer( wx.VERTICAL)
+        #self.infoPanel.SetSizer(self.infoSizer)
 
         self.horzSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.horzSizer.Add(self.filePanel)
+        self.horzSizer.Add(self.filePanel, 1)
+        self.horzSizer.Add(self.infoPanel, 3, wx.EXPAND)
         self.panel.SetSizer(self.horzSizer)
-        self.horzSizer.Layout()
-        # run anonymization on patient library here before printing
 
+        self.showSelectedFiles()
 
+        self.panel.Layout()
 
-        self.Maximize(True)
-        self.Show()
 
     def showSelectedFiles(self):
         self.SelectedPatients = []
@@ -337,19 +339,15 @@ class AnonymizeFiles(wx.Frame):
             fileNames = []
             if(files):
                 rlb = wx.ListBox(self.filePanel, size=(self.WindowSize[0] / 4 - 50, 100), choices=fileNames)
-                # rlb = wx.ListBox(self.panel, pos=(950, ((count * 125) + 30)), size=(300, 100), choices=fileNames)
                 for f in files:
                     rlb.Append(os.path.basename(os.path.normpath(f.filename)), value)
                 self.SelectedPatientFiles.append(rlb)
-                count = count + 1
         for nameText, listBox in zip(self.SelectedPatients, self.SelectedPatientFiles):
             self.fileSizer.Add(nameText, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10)
             self.fileSizer.Add(listBox, 0, wx.LEFT, 10)
 
         self.fileSizer.Layout()
         self.Show(True)
-
-
 
 
 def createLibrary():
