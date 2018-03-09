@@ -278,6 +278,10 @@ class SelectFiles(wx.Frame):
         self.Show(False)
 
 
+import wx.lib.stattext as ST
+import wx.grid
+
+
 class AnonymizeFiles(wx.Frame):
     def __init__(self, *args, **kwargs):
         super(AnonymizeFiles, self).__init__(*args, **kwargs)
@@ -302,9 +306,23 @@ class AnonymizeFiles(wx.Frame):
         self.filePanel.SetupScrolling()
         self.filePanel.SetBackgroundColour((200,200,200))
 
-        self.infoPanel = wx.Panel(self.panel)
+        self.infoPanel = sp.ScrolledPanel(self.panel)
+        self.infoPanel.SetupScrolling()
         self.infoPanel.SetBackgroundColour((100,200,200))
-        self.infoPanel.Show()
+
+        self.genInfoPanel = wx.Panel(self.infoPanel)
+        self.genInfoPanel.SetBackgroundColour((200,50,50))
+
+        self.patientInfo = wx.StaticText(self.genInfoPanel)
+        self.newPatientName = wx.
+
+        self.exportButton = wx.Button(self.genInfoPanel, label="Export Selected",)
+
+        self.patientTags = wx.grid.Grid(self.infoPanel)
+        self.patientTags.CreateGrid(0,2)
+        self.patientTags.SetColLabelValue(0, 'Tag')
+        self.patientTags.SetColLabelValue(1, 'Value')
+        self.patientTags.Hide()
 
 
         #for name, value in patientLib.PatientObjects.iteritems():
@@ -320,6 +338,16 @@ class AnonymizeFiles(wx.Frame):
         self.fileSizer = wx.BoxSizer(wx.VERTICAL)
         self.filePanel.SetSizer(self.fileSizer)
 
+        self.genInfoSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.genInfoSizer.Add(self.patientInfo, 4, wx.LEFT | wx.ALL, border=10)
+        self.genInfoSizer.Add(self.exportButton, 1, wx.RIGHT | wx.ALL, border=10)
+        self.genInfoPanel.SetSizer(self.genInfoSizer)
+
+        self.infoSizer = wx.BoxSizer(wx.VERTICAL)
+        self.infoSizer.Add(self.genInfoPanel, 1, wx.LEFT | wx.EXPAND| wx.ALL, border=10)
+        self.infoSizer.Add(self.patientTags, 5, wx.CENTER | wx.ALL, border=10)
+        self.infoPanel.SetSizer(self.infoSizer)
+
         self.horzSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.horzSizer.Add(self.filePanel, 1)
         self.horzSizer.Add(self.infoPanel, 3, wx.EXPAND)
@@ -330,7 +358,7 @@ class AnonymizeFiles(wx.Frame):
         self.showSelectedFiles()
 
         # UPDATE LAYOUT
-
+        self.infoPanel.Layout()
         self.panel.Layout()
 
     def OnClose(self, event):
@@ -349,7 +377,11 @@ class AnonymizeFiles(wx.Frame):
 
             # if there are selected files for the patient
             if value.usedFiles:
-                self.SelectedPatients.append(wx.StaticText(self.filePanel, label=pName))
+                pBday = value.unAnon_PatientBday
+                selectableText = ST.GenStaticText(self.filePanel, label=(pName+pBday))
+                self.SelectedPatients.append(selectableText)
+                #self.SelectedPatients.append(ST.GenStaticText(self.filePanel, label=pName))
+                selectableText.Bind(wx.EVT_LEFT_DOWN, self.selectPatient)
 
             # gets usedFiles from each patient
             files = value.usedFiles
@@ -357,10 +389,11 @@ class AnonymizeFiles(wx.Frame):
 
             # gets name of selected ('used') files associated with current patient
             if(files):
-                rlb = wx.ListBox(self.filePanel, size=(self.WindowSize[0] / 4 - 50, 100), choices=fileNames)
+                rlb = wx.CheckListBox(self.filePanel, size=(self.WindowSize[0] / 4 - 50, 100), choices=fileNames)
                 for f in files:
                     rlb.Append(os.path.basename(os.path.normpath(f.filename)), value)
                 self.SelectedPatientFiles.append(rlb)
+
 
         # adds the StaticText and Listbox widgets to the boxSizer for the filePanel (fileSizer)
         for nameText, listBox in zip(self.SelectedPatients, self.SelectedPatientFiles):
@@ -369,6 +402,66 @@ class AnonymizeFiles(wx.Frame):
 
         self.fileSizer.Layout()
         self.Show(True)
+
+    def selectPatient(self, event):
+        global patientLib
+        self.unSelectPatients(event.GetEventObject())
+        patient = patientLib.PatientObjects[event.GetEventObject().Label]
+        #print patient.unAnon_PatientsName
+        #print (patient.usedFiles[0]).PatientSex
+
+        #self.patientInfo.SetLabel(patient.unAnon_PatientsName)
+
+        if self.patientTags.GetNumberRows() != 0:
+            self.patientTags.DeleteRows(numRows=self.patientTags.GetNumberRows())
+
+
+        dataset = patient.usedFiles[0]
+        tagString = ''
+
+        for elem in dataset:
+            tagString = str(elem.tag) + ' ' + str(elem.name)
+            valueString = str(elem.repval)
+
+            # print valueString
+            try:
+                valueString.decode('utf-8')
+            except UnicodeError:
+                valueString = valueString.decode('iso-8859-9').encode('utf-8')
+
+            self.patientTags.AppendRows(1)
+            rows = self.patientTags.GetNumberRows()
+            self.patientTags.SetCellValue(rows-1,0, tagString)
+            self.patientTags.SetCellValue(rows-1,1, valueString)
+
+            if 'Patient' in tagString:
+                self.patientTags.SetCellBackgroundColour(rows-1, 0, (200,0,0))
+                self.patientTags.SetCellBackgroundColour(rows-1, 1, (200,0,0))
+
+        self.patientTags.AutoSize()
+        self.patientTags.Show()
+        self.infoPanel.Layout()
+
+        self.patientInfo.SetLabel(patient.unAnon_PatientsName)
+        self.patientInfo.Show()
+        # check if patient in post or pre-op & display on infoPanel
+
+        #for name, value in patientLib.PatientObjects:
+
+    def unSelectPatients(self, selectedText):
+        for textObject in self.SelectedPatients:
+            if selectedText.Label != textObject.GetLabel():
+                textObject.SetForegroundColour((0,0,0))
+                textObject.SetBackgroundColour((200,200,200))
+                textObject.Refresh()
+        selectedText.SetForegroundColour((0,0,0))
+        selectedText.SetBackgroundColour((88, 164, 221))
+        selectedText.Refresh()
+
+
+
+
+
 
 
 def createLibrary():

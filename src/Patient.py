@@ -24,6 +24,7 @@ class Patient(PatientLibrary):
         
         #initialize the Patient data attributes to be anonymized
         self.unAnon_PatientsName = dcmObject.PatientsName
+        self.unAnon_PatientBday = dcmObject.PatientBirthDate
 
     #TODO: delete?
     #only pass if the file has been confirmed to have the same patient name
