@@ -94,6 +94,7 @@ class SelectFiles(wx.Frame):
         self.selectImage = wx.Button(self.panel, pos=(self.WindowSize[0]/2, 520), label="Select Image")
         self.classifyPreop = wx.Button(self.panel, pos=(self.WindowSize[0]/2, 550), label="Label Pre-Op")
         self.classifyPostop = wx.Button(self.panel, pos =(self.WindowSize[0]/2 -2, 570), label="Label Post-Op")
+        self.deselectImageButton = wx.Button(self.panel, pos=(self.WindowSize[0]/2, 600), label="Deselect Image")
         self.anonSelected = wx.Button(self.panel, pos=(self.WindowSize[0]*.83, self.WindowSize[1]*0.9), label="Anonymize Selected")
 
 
@@ -101,13 +102,16 @@ class SelectFiles(wx.Frame):
         self.selectImage.Hide()
         self.classifyPreop.Hide()
         self.classifyPostop.Hide()
+        self.deselectImageButton.Hide()
         self.anonSelected.Show()
 
         # EVENT HANDLERS
         self.selectImage.Bind(wx.EVT_BUTTON, self.chooseImage)
         self.classifyPreop.Bind(wx.EVT_BUTTON, self.markPreop)
         self.classifyPostop.Bind(wx.EVT_BUTTON, self.markPostop)
+        self.deselectImageButton.Bind(wx.EVT_BUTTON, self.deselectImage)
         self.anonSelected.Bind(wx.EVT_BUTTON, self.nextScreen)
+
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
         self.CurrentDICOMObject = None
@@ -154,7 +158,12 @@ class SelectFiles(wx.Frame):
             fileNames = []
             lb = wx.ListBox(self.leftPanel, size=(self.WindowSize[0] / 4 - 50, 100), choices=fileNames)
             for f in files:
-                lb.Append(os.path.basename(os.path.normpath(f.filename)), value)
+                if f in value.preopFiles:
+                    lb.Append(os.path.basename(os.path.normpath(f.filename))+'*preop', value)
+                elif f in value.postopFiles:
+                    lb.Append(os.path.basename(os.path.normpath(f.filename))+'*postop', value)
+                else:
+                    lb.Append(os.path.basename(os.path.normpath(f.filename)), value)
             self.LeftPatientFileLists.append(lb)
 
             lb.Bind(wx.EVT_LISTBOX, self.displayImage)
@@ -181,8 +190,14 @@ class SelectFiles(wx.Frame):
             rlb = wx.ListBox(self.rightPanel, size=(self.WindowSize[0] / 4 - 50, 100), choices=fileNames)
             # rlb = wx.ListBox(self.panel, pos=(950, ((count * 125) + 30)), size=(300, 100), choices=fileNames)
             for f in files:
-                rlb.Append(os.path.basename(os.path.normpath(f.filename)), value)
+                if f in value.preopFiles:
+                    rlb.Append(os.path.basename(os.path.normpath(f.filename))+'*preop', value)
+                elif f in value.postopFiles:
+                    rlb.Append(os.path.basename(os.path.normpath(f.filename))+'*postop', value)
+                else:
+                    rlb.Append(os.path.basename(os.path.normpath(f.filename)), value)
             self.RightPatientFileLists.append(rlb)
+            rlb.Bind(wx.EVT_LISTBOX, self.displayImage)
 
         for nameText, listBox in zip(self.RightPatientText, self.RightPatientFileLists):
             self.rightSizer.Add(nameText, 0, wx.LEFT | wx.RIGHT | wx.TOP, 10 )
@@ -193,10 +208,10 @@ class SelectFiles(wx.Frame):
 
     def displayImage(self, event):
         self.CurrentPatient = event.GetClientData()
-        imgName = event.GetString()
+        imgName = event.GetString().split("*")[0]
 
         # get the pydicom object
-        for dcmObject in self.CurrentPatient.unusedFiles:
+        for dcmObject in self.CurrentPatient.unusedFiles + self.CurrentPatient.usedFiles:
             if (os.path.basename(os.path.normpath(dcmObject.filename)) == imgName):
                 self.CurrentDICOMObject = dcmObject
 
@@ -216,8 +231,13 @@ class SelectFiles(wx.Frame):
             self.selectImage.Show()
         self.classifyPreop.Show()
         self.classifyPostop.Show()
+        self.deselectImageButton.Show()
+
+        #for rlb in self.RightPatientFileLists:
+        #    rlb.Bind(wx.EVT_LISTBOX, self.displayImage)
 
         self.xrayImage = wx.StaticBitmap(self.panel, -1, png, (380, 10), (500, 500))
+
 
     def markPreop(self, event):
         # if the current file is already mark post op, remove it from that list
@@ -228,6 +248,10 @@ class SelectFiles(wx.Frame):
         if self.CurrentDICOMObject not in self.CurrentPatient.preopFiles:
             self.CurrentPatient.preopFiles.append(self.CurrentDICOMObject)
 
+        self.reprintFiles()
+
+
+
     def markPostop(self, event):
         if self.CurrentDICOMObject in self.CurrentPatient.preopFiles:
             self.CurrentPatient.preopFiles.remove(self.CurrentDICOMObject)
@@ -235,11 +259,71 @@ class SelectFiles(wx.Frame):
         if self.CurrentDICOMObject not in self.CurrentPatient.postopFiles:
             self.CurrentPatient.postopFiles.append(self.CurrentDICOMObject)
 
+        self.reprintFiles()
+
+    def reprintFiles(self):
+
+        for leftnameText in self.LeftPatientText:
+            leftnameText.Destroy()
+        for leftlistBox in self.LeftPatientFileLists:
+            leftlistBox.Destroy()
+
+
+        for rightnameText in self.RightPatientText:
+            rightnameText.Destroy()
+        for rightlistBox in self.RightPatientFileLists:
+            rightlistBox.Destroy()
+
+        self.leftPanel.Layout()
+        self.rightPanel.Layout()
+        # reprints the new unused files and patients
+        self.showUnusedFiles()
+        self.showUsedFiles()
+
+    def deselectImage(self, event):
+
+        if self.CurrentDICOMObject not in self.CurrentPatient.unusedFiles:
+            self.CurrentPatient.unusedFiles.append(self.CurrentDICOMObject)
+        if self.CurrentDICOMObject in self.CurrentPatient.usedFiles:
+            self.CurrentPatient.usedFiles.remove(self.CurrentDICOMObject)
+
+        '''
+        self.CurrentPatient.unusedFiles.append(self.CurrentDICOMObject)
+        self.CurrentPatient.usedFiles.remove(self.CurrentDICOMObject)
+        '''
+
+
+        for leftnameText in self.LeftPatientText:
+            leftnameText.Destroy()
+        for leftlistBox in self.LeftPatientFileLists:
+            leftlistBox.Destroy()
+
+
+        for rightnameText in self.RightPatientText:
+            rightnameText.Destroy()
+        for rightlistBox in self.RightPatientFileLists:
+            rightlistBox.Destroy()
+
+        self.leftPanel.Layout()
+        self.rightPanel.Layout()
+        # reprints the new unused files and patients
+        self.showUnusedFiles()
+        self.showUsedFiles()
+
+
     def chooseImage(self, event):
+
+        if self.CurrentDICOMObject not in self.CurrentPatient.usedFiles:
+            self.CurrentPatient.usedFiles.append(self.CurrentDICOMObject)
+        if self.CurrentDICOMObject in self.CurrentPatient.unusedFiles:
+            self.CurrentPatient.unusedFiles.remove(self.CurrentDICOMObject)
+
+        '''
         # adds selected file to usedFiles list
         self.CurrentPatient.usedFiles.append(self.CurrentDICOMObject)
         # removes the selected image from the unused files
         self.CurrentPatient.unusedFiles.remove(self.CurrentDICOMObject)
+        '''
 
         # destroys the existing listboxes, buttons, and text printed to the screen
         '''
@@ -297,6 +381,8 @@ class AnonymizeFiles(wx.Frame):
 
         self.SelectedPatients = []
         self.SelectedPatientFiles = []
+        self.selectedPatient = None
+        self.selectedImage = None
 
         # PANEL INITIALIZATIONS
 
@@ -314,7 +400,12 @@ class AnonymizeFiles(wx.Frame):
         self.genInfoPanel.SetBackgroundColour((200,50,50))
 
         self.patientInfo = wx.StaticText(self.genInfoPanel)
-        self.newPatientName = wx.
+        self.newPatientNameLabel = wx.StaticText(self.genInfoPanel)
+        self.newPatientNameLabel.Hide()
+        self.newPatientName = wx.TextCtrl(self.genInfoPanel, style=wx.TE_PROCESS_ENTER, value="Enter New Patient Name")
+        self.newPatientName.Hide()
+        self.updateNameButton = wx.Button(self.genInfoPanel, label="Update Name")
+        self.updateNameButton.Hide()
 
         self.exportButton = wx.Button(self.genInfoPanel, label="Export Selected",)
 
@@ -332,6 +423,9 @@ class AnonymizeFiles(wx.Frame):
 
         self.Bind(wx.EVT_CLOSE, self.parent.OnClose)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
+        self.newPatientName.Bind(wx.EVT_SET_FOCUS, self.highlightText)
+        self.updateNameButton.Bind(wx.EVT_BUTTON, self.updateName)
+        self.newPatientName.Bind(wx.EVT_TEXT_ENTER, self.updateName)
 
         # SIZERS
 
@@ -340,6 +434,10 @@ class AnonymizeFiles(wx.Frame):
 
         self.genInfoSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.genInfoSizer.Add(self.patientInfo, 4, wx.LEFT | wx.ALL, border=10)
+        self.genInfoSizer.Add(self.newPatientNameLabel, 1, wx.ALIGN_RIGHT | wx.TOP, border=10)
+        self.genInfoSizer.Add(self.newPatientName,3, wx.ALIGN_LEFT | wx.TOP, border=10)
+        self.genInfoSizer.Add(self.updateNameButton, 1, wx.LEFT | wx.ALL, border=10)
+        self.genInfoSizer.AddStretchSpacer(1)
         self.genInfoSizer.Add(self.exportButton, 1, wx.RIGHT | wx.ALL, border=10)
         self.genInfoPanel.SetSizer(self.genInfoSizer)
 
@@ -360,6 +458,17 @@ class AnonymizeFiles(wx.Frame):
         # UPDATE LAYOUT
         self.infoPanel.Layout()
         self.panel.Layout()
+
+    def updateName(self, event):
+        for ds in self.selectedPatient.usedFiles:
+            ds.PatientName = str(self.newPatientName.GetValue())
+
+        self.refreshGrid()
+
+    def highlightText(self, event):
+        # set selection works on windows, not on mac
+        event.GetEventObject().SetSelection(-1,-1)
+
 
     def OnClose(self, event):
         self.Destroy()
@@ -391,8 +500,14 @@ class AnonymizeFiles(wx.Frame):
             if(files):
                 rlb = wx.CheckListBox(self.filePanel, size=(self.WindowSize[0] / 4 - 50, 100), choices=fileNames)
                 for f in files:
-                    rlb.Append(os.path.basename(os.path.normpath(f.filename)), value)
+                    if f in value.preopFiles:
+                        rlb.Append(os.path.basename(os.path.normpath(f.filename)) + '*preop', value)
+                    elif f in value.postopFiles:
+                        rlb.Append(os.path.basename(os.path.normpath(f.filename)) + '*postop', value)
+                    else:
+                        rlb.Append(os.path.basename(os.path.normpath(f.filename)), value)
                 self.SelectedPatientFiles.append(rlb)
+                rlb.Bind(wx.EVT_LISTBOX, self.displayImageInfo)
 
 
         # adds the StaticText and Listbox widgets to the boxSizer for the filePanel (fileSizer)
@@ -405,29 +520,49 @@ class AnonymizeFiles(wx.Frame):
 
     def selectPatient(self, event):
         global patientLib
+
+        # remove highlight from other patient names
         self.unSelectPatients(event.GetEventObject())
-        patient = patientLib.PatientObjects[event.GetEventObject().Label]
+        self.newPatientName.SetValue("Enter New Patient Name")
+
+        self.selectedPatient = patientLib.PatientObjects[event.GetEventObject().Label]
+        self.selectedImage = self.selectedPatient.usedFiles[0] # by default selects first image when patient selected
         #print patient.unAnon_PatientsName
         #print (patient.usedFiles[0]).PatientSex
 
         #self.patientInfo.SetLabel(patient.unAnon_PatientsName)
 
+
+
+        self.refreshGrid()
+
+        # check if patient in post or pre-op & display on infoPanel
+        #for name, value in patientLib.PatientObjects:
+
+    def displayImageInfo(self, event):
+        self.selectedPatient = event.GetClientData()
+        for ds in self.selectedPatient.usedFiles:
+            if os.path.basename(os.path.normpath(ds.filename)) == (event.GetString().split("*")[0]):
+                self.selectedImage = ds
+
+        for textObject in self.SelectedPatients:
+            textObject.SetForegroundColour((0, 0, 0))
+            textObject.SetBackgroundColour((200, 200, 200))
+            textObject.Refresh()
+        self.refreshGrid()
+
+
+    def refreshGrid(self):
+
         if self.patientTags.GetNumberRows() != 0:
             self.patientTags.DeleteRows(numRows=self.patientTags.GetNumberRows())
 
-
-        dataset = patient.usedFiles[0]
-        tagString = ''
+        dataset = self.selectedImage
 
         for elem in dataset:
             tagString = str(elem.tag) + ' ' + str(elem.name)
             valueString = str(elem.repval)
 
-            # print valueString
-            try:
-                valueString.decode('utf-8')
-            except UnicodeError:
-                valueString = valueString.decode('iso-8859-9').encode('utf-8')
 
             self.patientTags.AppendRows(1)
             rows = self.patientTags.GetNumberRows()
@@ -440,13 +575,18 @@ class AnonymizeFiles(wx.Frame):
 
         self.patientTags.AutoSize()
         self.patientTags.Show()
-        self.infoPanel.Layout()
-
-        self.patientInfo.SetLabel(patient.unAnon_PatientsName)
+        self.patientInfo.SetLabel("Old Patient Name: " + self.selectedPatient.unAnon_PatientsName)
         self.patientInfo.Show()
-        # check if patient in post or pre-op & display on infoPanel
+        self.newPatientNameLabel.SetLabel("New Patient Name: ")
+        self.newPatientNameLabel.Show()
+        self.newPatientName.Show()
+        self.updateNameButton.Show()
 
-        #for name, value in patientLib.PatientObjects:
+        self.infoPanel.Layout()
+        self.genInfoPanel.Layout()
+
+
+
 
     def unSelectPatients(self, selectedText):
         for textObject in self.SelectedPatients:
