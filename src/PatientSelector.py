@@ -63,18 +63,24 @@ class PatientLibrary():
                         self.PatientObjects[pIdent] = patient
 
     def basicAnonymizeLibrary(self):
-
+        id = '123'
+        tagsAnon = {'AccessionNumber': '00000000', 'PatientID' : id, 'PatientAddress' : 'Unknown'}
         # iterate through every patient in library
         for name, patient in self.PatientObjects.iteritems():
             # iterate through every dicom file selected for anonymization
             for ds in patient.usedFiles:
-                tagname = "PatientAddress"
+                '''
+                tagname = "PatientID"
                 print ds.data_element(tagname).value
                 del ds[0x10,0x1040]
                 try:
                     ds[0x10,0x1040].value = 'Unknown'
                 except KeyError:
                     print 'Tag Do not exist'
+                '''
+
+                for tag, value in tagsAnon.iteritems():
+                    ds.data_element(tag).value = value
 
                 ''''
                 print ds[0x10,0x1040]
