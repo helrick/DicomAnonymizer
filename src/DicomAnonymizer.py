@@ -358,6 +358,8 @@ class SelectFiles(wx.Frame):
 
     def nextScreen(self, event):
         #TODO: should first check that there are selected images
+        global patientLib
+        patientLib.basicAnonymizeLibrary()
         AnonymizeFiles(self, title='Anonymize Files')
         self.Show(False)
 
