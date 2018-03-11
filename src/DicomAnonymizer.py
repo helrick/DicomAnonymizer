@@ -58,6 +58,9 @@ class SelectFolderDialog(wx.Frame):
         SelectFiles(self, title="Select Files to Anonymize")
         self.Show(False)
 
+    def OnClose(self, event):
+        self.Destroy()
+
 
 import wx.lib.scrolledpanel as sp
 
@@ -71,6 +74,8 @@ class SelectFiles(wx.Frame):
         self.Maximize(True)
         self.panel = wx.Panel(self)
         self.WindowSize = self.GetSize()
+
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
 
         self.leftPanel = sp.ScrolledPanel(self.panel, size=(self.WindowSize[0] / 4, self.WindowSize[1] - 20))
         self.leftPanel.SetupScrolling()
@@ -140,11 +145,13 @@ class SelectFiles(wx.Frame):
         self.showUsedFiles()
 
     def OnClose(self, event):
-        print 'here2'
         parent = self.GetParent()
-        self.Destroy()
         parent.Destroy()
-        event.Skip()
+
+    def OnClose(self):
+        parent = self.GetParent()
+        parent.Destroy()
+
 
     def showUnusedFiles(self):
         self.LeftPatientText = []
@@ -446,7 +453,6 @@ class AnonymizeFiles(wx.Frame):
 
         # EVENT HANDLERS
 
-        self.Bind(wx.EVT_CLOSE, self.parent.OnClose)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         #self.newPatientName.Bind(wx.EVT_SET_FOCUS, self.highlightText)
         self.updateNameButton.Bind(wx.EVT_BUTTON, self.updateName)
@@ -497,10 +503,9 @@ class AnonymizeFiles(wx.Frame):
 
 
     def OnClose(self, event):
-        print 'here'
-        self.Destroy()
-        
-        event.Skip()
+        self.parent.OnClose()
+        #self.Destroy()
+
 
     def showSelectedFiles(self):
         # Initialize function variables
