@@ -3,7 +3,9 @@ Program Flow for DICOM Anonymizer
 '''
 
 import wx
-import os.path
+#import os.path
+import os
+import sys
 from PatientSelector import PatientLibrary
 import Functions
 
@@ -59,7 +61,12 @@ class SelectFolderDialog(wx.Frame):
         self.Show(False)
 
     def OnClose(self, event):
+        try:
+          os.remove('tempfile.png')
+        except OSError:
+          pass
         self.Destroy()
+        sys.exit()
 
 
 import wx.lib.scrolledpanel as sp
@@ -145,12 +152,14 @@ class SelectFiles(wx.Frame):
         self.showUsedFiles()
 
     def OnClose(self, event):
+        try:
+          os.remove('tempfile.png')
+        except OSError:
+          pass
         parent = self.GetParent()
         parent.Destroy()
+        sys.exit()
 
-    def OnClose(self):
-        parent = self.GetParent()
-        parent.Destroy()
 
 
     def showUnusedFiles(self):
@@ -503,9 +512,14 @@ class AnonymizeFiles(wx.Frame):
 
 
     def OnClose(self, event):
-        self.parent.OnClose()
-        #self.Destroy()
-
+        try:
+          os.remove('tempfile.png')
+        except OSError:
+          pass
+        grandparent = self.GetParent().GetParent()
+        grandparent.Destroy()
+        self.Destroy()
+        sys.exit()
 
     def showSelectedFiles(self):
         # Initialize function variables
