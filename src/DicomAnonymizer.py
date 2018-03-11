@@ -93,8 +93,8 @@ class SelectFiles(wx.Frame):
         '''
         self.selectImage = wx.Button(self.panel, pos=(self.WindowSize[0]/2, 520), label="Select Image")
         self.classifyPreop = wx.Button(self.panel, pos=(self.WindowSize[0]/2, 550), label="Label Pre-Op")
-        self.classifyPostop = wx.Button(self.panel, pos =(self.WindowSize[0]/2 -2, 570), label="Label Post-Op")
-        self.deselectImageButton = wx.Button(self.panel, pos=(self.WindowSize[0]/2, 600), label="Deselect Image")
+        self.classifyPostop = wx.Button(self.panel, pos =(self.WindowSize[0]/2 -2, 580), label="Label Post-Op")
+        self.deselectImageButton = wx.Button(self.panel, pos=(self.WindowSize[0]/2 -5, 610), label="Deselect Image")
         self.anonSelected = wx.Button(self.panel, pos=(self.WindowSize[0]*.83, self.WindowSize[1]*0.9), label="Anonymize Selected")
 
 
@@ -140,6 +140,7 @@ class SelectFiles(wx.Frame):
         self.showUsedFiles()
 
     def OnClose(self, event):
+        print 'here2'
         parent = self.GetParent()
         self.Destroy()
         parent.Destroy()
@@ -218,12 +219,34 @@ class SelectFiles(wx.Frame):
         from matplotlib import pyplot
         pyplot.imshow(self.CurrentDICOMObject.pixel_array, cmap=pyplot.cm.bone)
         pyplot.axis('off')
-
+        
+        import tempfile
+        from base64 import b64encode
+        
+        '''
+        temp_png = tempfile.NamedTemporaryFile(suffix='.png')
+        pyplot.savefig(temp_png)
+        i = wx.Image(temp_png, 'image/png', -1)
+        i.Resize(size=(500,500), pos=(0,0), red=255, green=255, blue=255)
+        png = i.ConvertToBitmap()
+        
+        
+        
+        with tempfile.TemporaryFile(suffix=".png") as tmpfile:
+          pyplot.savefig(tmpfile)
+          tmpfile.seek(0)
+          print b64encode(tmpfile.read())
+          i = wx.Image(tmpfile, 'image/png', -1)
+          i.Resize(size=(500,500), pos=(0,0), red=255, green=255, blue=255)
+          png = i.ConvertToBitmap()
+        '''
+       
         pyplot.savefig('tempfile.png', bbox_inches='tight', pad_inches=0.0)
         i = wx.Image('tempfile.png', 'image/png', -1)
         i.Resize(size=(500, 500), pos=(0, 0), red=255, green=255, blue=255)
         png = i.ConvertToBitmap()
 
+        
         # checks that the image and button are properly destroyed before deleting
         if self.xrayImage:
             self.xrayImage.Destroy()
@@ -236,7 +259,7 @@ class SelectFiles(wx.Frame):
         #for rlb in self.RightPatientFileLists:
         #    rlb.Bind(wx.EVT_LISTBOX, self.displayImage)
 
-        self.xrayImage = wx.StaticBitmap(self.panel, -1, png, (380, 10), (500, 500))
+        self.xrayImage = wx.StaticBitmap(self.panel, -1, png, (self.WindowSize[0]/2 -250, 10), (500, 500))
 
 
     def markPreop(self, event):
@@ -396,10 +419,10 @@ class AnonymizeFiles(wx.Frame):
 
         self.infoPanel = sp.ScrolledPanel(self.panel)
         self.infoPanel.SetupScrolling()
-        self.infoPanel.SetBackgroundColour((100,200,200))
+        #self.infoPanel.SetBackgroundColour((100,200,200))
 
         self.genInfoPanel = wx.Panel(self.infoPanel)
-        self.genInfoPanel.SetBackgroundColour((200,50,50))
+        #self.genInfoPanel.SetBackgroundColour((200,50,50))
 
         self.patientInfo = wx.StaticText(self.genInfoPanel)
         self.newPatientNameLabel = wx.StaticText(self.genInfoPanel)
@@ -474,7 +497,9 @@ class AnonymizeFiles(wx.Frame):
 
 
     def OnClose(self, event):
+        print 'here'
         self.Destroy()
+        
         event.Skip()
 
     def showSelectedFiles(self):
