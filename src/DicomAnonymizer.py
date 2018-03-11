@@ -425,7 +425,7 @@ class AnonymizeFiles(wx.Frame):
 
         self.Bind(wx.EVT_CLOSE, self.parent.OnClose)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
-        self.newPatientName.Bind(wx.EVT_SET_FOCUS, self.highlightText)
+        #self.newPatientName.Bind(wx.EVT_SET_FOCUS, self.highlightText)
         self.updateNameButton.Bind(wx.EVT_BUTTON, self.updateName)
         self.newPatientName.Bind(wx.EVT_TEXT_ENTER, self.updateName)
 
@@ -467,9 +467,10 @@ class AnonymizeFiles(wx.Frame):
 
         self.refreshGrid()
 
-    def highlightText(self, event):
+    #def highlightText(self, event):
+        #pass
         # set selection works on windows, not on mac
-        event.GetEventObject().SetSelection(-1,-1)
+        #event.GetEventObject().SetSelection(-1,-1)
 
 
     def OnClose(self, event):
