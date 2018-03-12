@@ -232,6 +232,8 @@ class SelectFiles(wx.Frame):
             if (os.path.basename(os.path.normpath(dcmObject.filename)) == imgName):
                 self.CurrentDICOMObject = dcmObject
 
+
+
         from matplotlib import pyplot
         pyplot.imshow(self.CurrentDICOMObject.pixel_array, cmap=pyplot.cm.bone)
         pyplot.axis('off')
@@ -246,8 +248,6 @@ class SelectFiles(wx.Frame):
         i.Resize(size=(500,500), pos=(0,0), red=255, green=255, blue=255)
         png = i.ConvertToBitmap()
         
-        
-        
         with tempfile.TemporaryFile(suffix=".png") as tmpfile:
           pyplot.savefig(tmpfile)
           tmpfile.seek(0)
@@ -256,12 +256,26 @@ class SelectFiles(wx.Frame):
           i.Resize(size=(500,500), pos=(0,0), red=255, green=255, blue=255)
           png = i.ConvertToBitmap()
         '''
-       
+        from io import BytesIO
+        from matplotlib import rc
+        rc('savefig', format='png')
+        buf = BytesIO()
+        pyplot.savefig(buf, bbox_inches='tight', pad_inches=0.0)
+        buf.seek(0)
+        img = wx.Image(buf, wx.BITMAP_TYPE_PNG)
+        img.Resize(size=(500, 500), pos=(0, 0), red=255, green=255, blue=255)
+        png = wx.Bitmap(img)
+
+        #This works:
+        '''
         pyplot.savefig('tempfile.png', bbox_inches='tight', pad_inches=0.0)
         i = wx.Image('tempfile.png', 'image/png', -1)
         i.Resize(size=(500, 500), pos=(0, 0), red=255, green=255, blue=255)
         png = i.ConvertToBitmap()
-
+        
+        
+        self.xrayImage = wx.StaticBitmap(self.panel, -1, png, (self.WindowSize[0]/2 -250, 10), (500, 500))
+        '''
         
         # checks that the image and button are properly destroyed before deleting
         if self.xrayImage:
@@ -275,8 +289,8 @@ class SelectFiles(wx.Frame):
         #for rlb in self.RightPatientFileLists:
         #    rlb.Bind(wx.EVT_LISTBOX, self.displayImage)
 
-        self.xrayImage = wx.StaticBitmap(self.panel, -1, png, (self.WindowSize[0]/2 -250, 10), (500, 500))
 
+        self.xrayImage = wx.StaticBitmap(self.panel, -1, png, (self.WindowSize[0]/2 -250, 10), (500, 500))
 
     def markPreop(self, event):
         # if the current file is already mark post op, remove it from that list
@@ -400,6 +414,10 @@ class SelectFiles(wx.Frame):
         global patientLib
         patientLib.basicAnonymizeLibrary()
         AnonymizeFiles(self, title='Anonymize Files')
+        try:
+          os.remove('tempfile.png')
+        except OSError:
+          pass
         self.Show(False)
 
 
@@ -508,22 +526,35 @@ class AnonymizeFiles(wx.Frame):
 
     def exportSelected(self, event):
 
+
+
+        dest=""
+        dialog = wx.DirDialog(self, "Choose or Create Destination Folder", dest)
+        if dialog.ShowModal() == wx.ID_OK:
+            dest = dialog.GetPath()
+
+
         checkedFiles = []
 
         for lb in self.SelectedPatientFiles:
-            checkedFiles.append(lb.GetCheckedItems())
+            # get the patient from the first checked image value
+            curr_patient = (lb.GetClientData(lb.GetCheckedItems()[0]))
+            for item in lb.GetCheckedItems():
+                fileString = str(lb.GetString(item))
+                for ds in curr_patient.usedFiles:
+                    if os.path.basename(os.path.normpath(ds.filename)) == fileString.split("*")[0]:
+                        ds.save_as(os.path.join(dest,fileString), False)
 
-        print checkedFiles
+        dlg = wx.MessageDialog(self, 'Files Exported, the program can be closed now', '', wx.OK | wx.ICON_INFORMATION)
+        val = dlg.ShowModal()
+        dlg.Show()
 
-        dialog = wx.DirDialog(self, "Choose or Create Destination Folder", "")
-        if dialog.ShowModal() == wx.ID_OK:
-            dest = dialog.GetPath()
-            print dest
+                #ds = curr_patient.usedFiles
+                #checkedFiles.append(str(lb.GetString(item)))
+
+
+
         dialog.Destroy()
-
-
-
-
 
 
     #def highlightText(self, event):
@@ -640,8 +671,7 @@ class AnonymizeFiles(wx.Frame):
             self.patientTags.SetCellValue(rows-1,0, tagString)
             self.patientTags.SetCellValue(rows-1,1, valueString)
 
-            print tagName
-            print patientLib.tagsAnon_nums[0]
+
             if tagName in patientLib.tagsAnon_nums:
                 self.patientTags.SetCellBackgroundColour(rows - 1, 0, (113, 237, 142))
                 self.patientTags.SetCellBackgroundColour(rows - 1, 1, (113, 237, 142))

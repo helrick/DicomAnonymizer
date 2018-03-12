@@ -99,8 +99,9 @@ class PatientLibrary():
 
 
         # iterate through every patient in library
-        idCount = int(self.tagsAnon['PatientID'])
+        idCount = 100000
         for name, patient in self.PatientObjects.iteritems():
+            print name
             # increments the id
             self.tagsAnon['PatientID'] = str(idCount)
             idCount = idCount + 1
