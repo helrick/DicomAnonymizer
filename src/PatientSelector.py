@@ -146,7 +146,6 @@ class PatientLibrary():
     def testLibrary(self):
         import os.path
         for name, value in self.PatientObjects.iteritems():
-            print name
             files = value.unusedFiles
             for f in files:
                 print os.path.basename(os.path.normpath(f.filename))
