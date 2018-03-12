@@ -46,7 +46,7 @@ class SelectFolderDialog(wx.Frame):
         self.Show()
 
     def onSelectDir(self, event):
-        dialog = wx.DirDialog(self, message="Choose Source Folder")
+        dialog = wx.DirDialog(self, "Choose Source Folder", "", wx.DD_DEFAULT_STYLE| wx.DD_DIR_MUST_EXIST)
         if dialog.ShowModal() == wx.ID_OK:
             global sourcePath
             sourcePath = dialog.GetPath()
@@ -448,7 +448,7 @@ class AnonymizeFiles(wx.Frame):
         self.updateNameButton = wx.Button(self.genInfoPanel, label="Update Name")
         self.updateNameButton.Hide()
 
-        self.exportButton = wx.Button(self.genInfoPanel, label="Export Selected",)
+        self.exportButton = wx.Button(self.genInfoPanel, label="Export Selected")
 
         self.patientTags = wx.grid.Grid(self.infoPanel)
         self.patientTags.CreateGrid(0,2)
@@ -463,6 +463,7 @@ class AnonymizeFiles(wx.Frame):
         # EVENT HANDLERS
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
+        self.exportButton.Bind(wx.EVT_BUTTON, self.exportSelected)
         #self.newPatientName.Bind(wx.EVT_SET_FOCUS, self.highlightText)
         self.updateNameButton.Bind(wx.EVT_BUTTON, self.updateName)
         self.newPatientName.Bind(wx.EVT_TEXT_ENTER, self.updateName)
@@ -504,6 +505,26 @@ class AnonymizeFiles(wx.Frame):
             ds.PatientName = str(self.newPatientName.GetValue())
 
         self.refreshGrid()
+
+    def exportSelected(self, event):
+
+        checkedFiles = []
+
+        for lb in self.SelectedPatientFiles:
+            checkedFiles.append(lb.GetCheckedItems())
+
+        print checkedFiles
+
+        dialog = wx.DirDialog(self, "Choose or Create Destination Folder", "")
+        if dialog.ShowModal() == wx.ID_OK:
+            dest = dialog.GetPath()
+            print dest
+        dialog.Destroy()
+
+
+
+
+
 
     #def highlightText(self, event):
         #pass
@@ -601,6 +622,8 @@ class AnonymizeFiles(wx.Frame):
 
     def refreshGrid(self):
 
+        global patientLib
+
         if self.patientTags.GetNumberRows() != 0:
             self.patientTags.DeleteRows(numRows=self.patientTags.GetNumberRows())
 
@@ -609,6 +632,7 @@ class AnonymizeFiles(wx.Frame):
         for elem in dataset:
             tagString = str(elem.tag) + ' ' + str(elem.name)
             valueString = str(elem.repval)
+            tagName = str(elem.tag)
 
 
             self.patientTags.AppendRows(1)
@@ -616,9 +640,20 @@ class AnonymizeFiles(wx.Frame):
             self.patientTags.SetCellValue(rows-1,0, tagString)
             self.patientTags.SetCellValue(rows-1,1, valueString)
 
-            if 'Patient' in tagString:
+            print tagName
+            print patientLib.tagsAnon_nums[0]
+            if tagName in patientLib.tagsAnon_nums:
+                self.patientTags.SetCellBackgroundColour(rows - 1, 0, (113, 237, 142))
+                self.patientTags.SetCellBackgroundColour(rows - 1, 1, (113, 237, 142))
+
+
+
+
+            '''
+            if tagString in patientLib.tagsAnon:
                 self.patientTags.SetCellBackgroundColour(rows-1, 0, (200,0,0))
                 self.patientTags.SetCellBackgroundColour(rows-1, 1, (200,0,0))
+            '''
 
         self.patientTags.AutoSize()
         self.patientTags.Show()

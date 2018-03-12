@@ -22,6 +22,38 @@ class PatientLibrary():
         self.sourceDir = folderPath
         #store Patient objects in dict
         self.PatientObjects = {}
+        # dict for how to anonymize tags, # indicated remove tag altogether
+        self.tagsAnon = {'AccessionNumber': '00000000',
+                         'PatientID': '100000',
+                         'PatientAddress': 'Unknown',
+                         'StudyID': '00000000',
+                         'PerformedProcedureStepID': '#',
+                         'ScheduledProcedureStepID': '#',
+                         'RequestAttributesSequence': '#'}
+
+        self.tagsAnon_nums = ['(0008, 0050)', '(0010, 0020)', '(0010, 1040)', '(0020, 0010)', '(0040, 0253)', '(0040, 0009)', '(0040, 0275)']
+
+        # so far just the A's
+        self.additionalTags = {'AccessionNumber': '00000000',
+                          'AcquisitionComments': '#',
+                          'AcquisitionContextSequence': '#',
+                          'AcquisitionDate': '#',
+                          'AcquisitionDateTime': '#',
+                          'AcquisitionDeviceProcessingDescr': '#',
+                          'AcquisitionProtocolDescription': '#',
+                          'AcquisitionTime': '#',
+                          'ActualHumanPerformersSequence': '#',
+                          'AdditionalPatientHistory': '#',
+                          'AddressTrial': '#',
+                          'AdmissionID': '#',
+                          'AdmittingDate': '#',
+                          'AdmittingDiagnosesDescription': '#',
+                          'AdmittingDiagnosesCodeSequence': '#',
+                          'AdmittingTime': '#',
+                          'Allergies': '#',
+                          'Arbitrary': '#',
+                          'AuthorObserverSequence': '#'
+                          }
 
     '''
     Iterates through the files in the source directory,
@@ -63,12 +95,19 @@ class PatientLibrary():
                         self.PatientObjects[pIdent] = patient
 
     def basicAnonymizeLibrary(self):
-        id = '123'
-        tagsAnon = {'AccessionNumber': '00000000', 'PatientID' : id, 'PatientAddress' : 'Unknown'}
+
+
+
         # iterate through every patient in library
+        idCount = int(self.tagsAnon['PatientID'])
         for name, patient in self.PatientObjects.iteritems():
+            # increments the id
+            self.tagsAnon['PatientID'] = str(idCount)
+            idCount = idCount + 1
+
             # iterate through every dicom file selected for anonymization
             for ds in patient.usedFiles:
+
                 '''
                 tagname = "PatientID"
                 print ds.data_element(tagname).value
@@ -79,8 +118,20 @@ class PatientLibrary():
                     print 'Tag Do not exist'
                 '''
 
-                for tag, value in tagsAnon.iteritems():
-                    ds.data_element(tag).value = value
+                for tag, value in self.tagsAnon.iteritems():
+                    if value == '#':
+                        try:
+                            x = ds.data_element(tag).tag
+                            del ds[x]
+                        except:
+                            # the tag didn't exist in the first place
+                            pass
+                    else:
+                        try:
+                            ds.data_element(tag).value = value
+                        except:
+                            # tag didn't exist
+                            pass
 
                 ''''
                 print ds[0x10,0x1040]
