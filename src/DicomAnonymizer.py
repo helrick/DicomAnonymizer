@@ -176,9 +176,9 @@ class SelectFiles(wx.Frame):
             lb = wx.ListBox(self.leftPanel, size=(self.WindowSize[0] / 4 - 50, 100), choices=fileNames)
             for f in files:
                 if f in value.preopFiles:
-                    lb.Append(os.path.basename(os.path.normpath(f.filename))+'*preop', value)
+                    lb.Append(os.path.basename(os.path.normpath(f.filename))+'$preop', value)
                 elif f in value.postopFiles:
-                    lb.Append(os.path.basename(os.path.normpath(f.filename))+'*postop', value)
+                    lb.Append(os.path.basename(os.path.normpath(f.filename))+'$postop', value)
                 else:
                     lb.Append(os.path.basename(os.path.normpath(f.filename)), value)
             self.LeftPatientFileLists.append(lb)
@@ -208,9 +208,9 @@ class SelectFiles(wx.Frame):
             # rlb = wx.ListBox(self.panel, pos=(950, ((count * 125) + 30)), size=(300, 100), choices=fileNames)
             for f in files:
                 if f in value.preopFiles:
-                    rlb.Append(os.path.basename(os.path.normpath(f.filename))+'*preop', value)
+                    rlb.Append(os.path.basename(os.path.normpath(f.filename))+'$preop', value)
                 elif f in value.postopFiles:
-                    rlb.Append(os.path.basename(os.path.normpath(f.filename))+'*postop', value)
+                    rlb.Append(os.path.basename(os.path.normpath(f.filename))+'$postop', value)
                 else:
                     rlb.Append(os.path.basename(os.path.normpath(f.filename)), value)
             self.RightPatientFileLists.append(rlb)
@@ -225,7 +225,7 @@ class SelectFiles(wx.Frame):
 
     def displayImage(self, event):
         self.CurrentPatient = event.GetClientData()
-        imgName = event.GetString().split("*")[0]
+        imgName = event.GetString().split("$")[0]
 
         # get the pydicom object
         for dcmObject in self.CurrentPatient.unusedFiles + self.CurrentPatient.usedFiles:
@@ -542,8 +542,8 @@ class AnonymizeFiles(wx.Frame):
             for item in lb.GetCheckedItems():
                 fileString = str(lb.GetString(item))
                 for ds in curr_patient.usedFiles:
-                    if os.path.basename(os.path.normpath(ds.filename)) == fileString.split("*")[0]:
-                        ds.save_as(os.path.join(dest,fileString), False)
+                    if os.path.basename(os.path.normpath(ds.filename)) == fileString.split("$")[0]:
+                        ds.save_as(str(os.path.join(dest,fileString)))
 
         dlg = wx.MessageDialog(self, 'Files Exported, the program can be closed now', '', wx.OK | wx.ICON_INFORMATION)
         val = dlg.ShowModal()
@@ -600,9 +600,9 @@ class AnonymizeFiles(wx.Frame):
                 rlb = wx.CheckListBox(self.filePanel, size=(self.WindowSize[0] / 4 - 50, 100), choices=fileNames)
                 for f in files:
                     if f in value.preopFiles:
-                        rlb.Append(os.path.basename(os.path.normpath(f.filename)) + '*preop', value)
+                        rlb.Append(os.path.basename(os.path.normpath(f.filename)) + '$preop', value)
                     elif f in value.postopFiles:
-                        rlb.Append(os.path.basename(os.path.normpath(f.filename)) + '*postop', value)
+                        rlb.Append(os.path.basename(os.path.normpath(f.filename)) + '$postop', value)
                     else:
                         rlb.Append(os.path.basename(os.path.normpath(f.filename)), value)
                 self.SelectedPatientFiles.append(rlb)
@@ -641,7 +641,7 @@ class AnonymizeFiles(wx.Frame):
     def displayImageInfo(self, event):
         self.selectedPatient = event.GetClientData()
         for ds in self.selectedPatient.usedFiles:
-            if os.path.basename(os.path.normpath(ds.filename)) == (event.GetString().split("*")[0]):
+            if os.path.basename(os.path.normpath(ds.filename)) == (event.GetString().split("$")[0]):
                 self.selectedImage = ds
 
         for textObject in self.SelectedPatients:
