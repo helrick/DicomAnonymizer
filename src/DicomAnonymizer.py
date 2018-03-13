@@ -22,14 +22,18 @@ class SelectFolderDialog(wx.Frame):
         # Initialize Widgets
         self.PathSelection = wx.TextCtrl(panel, style=wx.TE_READONLY)
         self.SelectDirButton = wx.Button(panel, label="Select DICOM Directory")
+        #bmp = wx.ArtProvider.GetBitmap(wx.ART_HELP)
+        self.InfoIcon = wx.StaticBitmap(panel, bitmap=(wx.ArtProvider.GetBitmap(wx.ART_HELP)))
         self.ContinueButton = wx.Button(panel, label="Continue")
 
         # Sizer
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.sizer.AddStretchSpacer(prop=1)
 
+        self.sizer.Add(self.InfoIcon, flag=wx.ALIGN_LEFT | wx.ALL, border=10)
         self.sizer.Add(self.PathSelection, flag=wx.ALIGN_CENTER | wx.EXPAND | wx.ALL, border=10)
         self.sizer.Add(self.SelectDirButton, flag=wx.ALIGN_CENTER)
+        #self.sizer.Add(self.InfoIcon, flag=wx.ALIGN_CENTER)
 
         self.sizer.AddStretchSpacer(prop=1)
 
@@ -39,10 +43,15 @@ class SelectFolderDialog(wx.Frame):
 
         # Event Handlers
         self.SelectDirButton.Bind(wx.EVT_BUTTON, self.onSelectDir)
+        self.InfoIcon.Bind(wx.EVT_MOTION, self.displayInfo)
 
         self.SetInitialSize((550, 225))
         self.Center()
         self.Show()
+
+    def displayInfo(self, event):
+        self.InfoIcon.SetToolTip("Click 'Select a DICOM Directory', choose a folder containing DICOM images, and press "
+                                 "'Continue' to view the selected files")
 
     def onSelectDir(self, event):
         dialog = wx.DirDialog(self, "Choose Source Folder", "", wx.DD_DEFAULT_STYLE| wx.DD_DIR_MUST_EXIST)
@@ -107,7 +116,7 @@ class SelectFiles(wx.Frame):
         self.classifyPostop = wx.Button(self.panel, pos =(self.WindowSize[0]/2 -2, 580), label="Label Post-Op")
         self.deselectImageButton = wx.Button(self.panel, pos=(self.WindowSize[0]/2 -5, 610), label="Deselect Image")
         self.anonSelected = wx.Button(self.panel, pos=(self.WindowSize[0]*.83, self.WindowSize[1]*0.9), label="Anonymize Selected")
-
+        self.InfoIcon = wx.StaticBitmap(self.imagePanel, bitmap=(wx.ArtProvider.GetBitmap(wx.ART_HELP)))
 
         # Hide/Show Buttons
         self.selectImage.Hide()
@@ -122,6 +131,7 @@ class SelectFiles(wx.Frame):
         self.classifyPostop.Bind(wx.EVT_BUTTON, self.markPostop)
         self.deselectImageButton.Bind(wx.EVT_BUTTON, self.deselectImage)
         self.anonSelected.Bind(wx.EVT_BUTTON, self.nextScreen)
+        self.InfoIcon.Bind(wx.EVT_MOTION, self.displayInfo)
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
@@ -137,6 +147,11 @@ class SelectFiles(wx.Frame):
         # SIZERS
         self.leftSizer = wx.BoxSizer( wx.VERTICAL)
         self.leftPanel.SetSizer(self.leftSizer)
+
+        self.imgSizer = wx.BoxSizer( wx.HORIZONTAL)
+        self.imgSizer.Add(self.InfoIcon, 0, wx.ALIGN_LEFT | wx.ALL, border=5)
+        self.imagePanel.SetSizer(self.imgSizer)
+        self.imgSizer.Layout()
 
         self.rightSizer = wx.BoxSizer( wx.VERTICAL)
         self.rightPanel.SetSizer(self.rightSizer)
@@ -159,6 +174,12 @@ class SelectFiles(wx.Frame):
         parent.Destroy()
         sys.exit()
 
+    def displayInfo(self, event):
+        self.InfoIcon.SetToolTip("Click images on the left to preview them. Click 'Select Image' to mark an image for "
+                                 "anonymization, and 'Label PreOp' or 'Label PostOp' to label the image. If you'd like "
+                                 "to change your selection, choose an image on the right and click 'Deselect Image'. "
+                                 "Once you are satisfied with your selections, Click 'Anonymize Selected' to go to the "
+                                 "next step")
 
 
     def showUnusedFiles(self):
