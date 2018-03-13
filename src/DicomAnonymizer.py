@@ -7,7 +7,6 @@ import wx
 import os
 import sys
 from PatientSelector import PatientLibrary
-import Functions
 
 sourcePath = ''
 patientLib = None
