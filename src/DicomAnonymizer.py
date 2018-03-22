@@ -665,7 +665,8 @@ class AnonymizeFiles(wx.Frame):
             # if there are selected files for the patient
             if value.usedFiles:
                 pBday = value.unAnon_PatientBday
-                selectableText = ST.GenStaticText(self.filePanel, label=(pName+pBday))
+                sDate = value.sessionDate
+                selectableText = ST.GenStaticText(self.filePanel, label=(pName+'-'+sDate))
                 self.SelectedPatients.append(selectableText)
                 #self.SelectedPatients.append(ST.GenStaticText(self.filePanel, label=pName))
                 selectableText.Bind(wx.EVT_LEFT_DOWN, self.selectPatient)
@@ -763,6 +764,10 @@ class AnonymizeFiles(wx.Frame):
             if tagName in patientLib.tagsAnon_nums:
                 self.patientTags.SetCellBackgroundColour(rows - 1, 0, (113, 237, 142))
                 self.patientTags.SetCellBackgroundColour(rows - 1, 1, (113, 237, 142))
+
+            if tagName == '(0010, 0010)':
+                self.patientTags.SetCellBackgroundColour(rows-1, 0, (255, 228, 94))
+                self.patientTags.SetCellBackgroundColour(rows-1, 1, (255, 228, 94))
 
 
 
