@@ -84,8 +84,9 @@ class PatientLibrary():
                     ds = dicom.read_file(filePath)
                     pName = ds.PatientsName
                     pBday = ds.PatientBirthDate
+                    sDate = ds.AcquisitionDate
 
-                    pIdent = pName+pBday
+                    pIdent = pName+pBday+sDate
                     #if patient already seen, add ds to Patient
                     if pIdent in self.PatientObjects:
                         self.PatientObjects[pIdent].add_dicomObject(ds)

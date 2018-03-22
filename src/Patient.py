@@ -20,8 +20,7 @@ class Patient(PatientLibrary):
         self.usedFiles = []
 
         self.fileLabels = []
-        self.preopFiles = []
-        self.postopFiles = []
+
         
         #initialize the Patient data attributes to be anonymized
         self.unAnon_PatientsName = dcmObject.PatientsName
