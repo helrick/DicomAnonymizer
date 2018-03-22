@@ -16,6 +16,7 @@ class SelectFolderDialog(wx.Frame):
 
     def __init__(self, *args, **kwargs):
         super(SelectFolderDialog, self).__init__(*args, **kwargs)
+
         panel = wx.Panel(self)
         self.currentDirectory = os.getcwd()
 
@@ -85,10 +86,13 @@ class SelectFiles(wx.Frame):
     def __init__(self, *args, **kwargs):
         super(SelectFiles, self).__init__(*args, **kwargs)
         global patientLib
+
         patientLib = createLibrary()
         self.Maximize(True)
+
         self.panel = wx.Panel(self)
         self.WindowSize = self.GetSize()
+        self.SetSizeHints(self.WindowSize[0],self.WindowSize[1])
 
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
@@ -104,6 +108,7 @@ class SelectFiles(wx.Frame):
         self.imagePanel = wx.Panel(self.panel, pos=(400, 10))
         self.imagePanel.Show()
         self.xrayImage = wx.StaticBitmap()
+        self.xrayDate = wx.StaticText(self.panel, pos=((self.WindowSize[0]/2) - 250, 520))
 
         # Initialize Buttons
         '''
@@ -111,9 +116,16 @@ class SelectFiles(wx.Frame):
         self.classifyPreop = wx.Button(self.imagePanel, pos=(600, 550), label="Label Pre-Op")
         self.classifyPostop = wx.Button(self.imagePanel, pos=(598, 570), label="Label Post-Op")
         '''
+
         self.selectImage = wx.Button(self.panel, pos=(self.WindowSize[0]/2, 520), label="Select Image")
-        self.classifyPreop = wx.Button(self.panel, pos=(self.WindowSize[0]/2, 550), label="Label Pre-Op")
-        self.classifyPostop = wx.Button(self.panel, pos =(self.WindowSize[0]/2 -2, 580), label="Label Post-Op")
+        self.classifyPreop = wx.Button(self.panel, pos=(self.WindowSize[0]/2, 550), label="Pre-Op")
+
+        self.classifyPostop6wk = wx.Button(self.panel, pos =(self.WindowSize[0]/2 -250, 580), label="6wk Post-Op")
+        self.classifyPostop3mth = wx.Button(self.panel, pos =(self.WindowSize[0]/2 -150, 580), label="3mth Post-Op")
+        self.classifyPostop6mth = wx.Button(self.panel, pos =(self.WindowSize[0]/2 -50, 580), label="6mth Post-Op")
+        self.classifyPostop1yr = wx.Button(self.panel, pos =(self.WindowSize[0]/2 +50, 580), label="1yr Post-Op")
+        self.classifyPostop5yr = wx.Button(self.panel, pos =(self.WindowSize[0]/2 +150, 580), label="5yr Post-Op")
+
         self.deselectImageButton = wx.Button(self.panel, pos=(self.WindowSize[0]/2 -5, 610), label="Deselect Image")
         self.anonSelected = wx.Button(self.panel, pos=(self.WindowSize[0]*.83, self.WindowSize[1]*0.9), label="Anonymize Selected")
         self.InfoIcon = wx.StaticBitmap(self.imagePanel, bitmap=(wx.ArtProvider.GetBitmap(wx.ART_HELP)))
@@ -121,14 +133,14 @@ class SelectFiles(wx.Frame):
         # Hide/Show Buttons
         self.selectImage.Hide()
         self.classifyPreop.Hide()
-        self.classifyPostop.Hide()
+        #self.classifyPostop.Hide()
         self.deselectImageButton.Hide()
         self.anonSelected.Show()
 
         # EVENT HANDLERS
         self.selectImage.Bind(wx.EVT_BUTTON, self.chooseImage)
         self.classifyPreop.Bind(wx.EVT_BUTTON, self.markPreop)
-        self.classifyPostop.Bind(wx.EVT_BUTTON, self.markPostop)
+        #self.classifyPostop.Bind(wx.EVT_BUTTON, self.markPostop)
         self.deselectImageButton.Bind(wx.EVT_BUTTON, self.deselectImage)
         self.anonSelected.Bind(wx.EVT_BUTTON, self.nextScreen)
         self.InfoIcon.Bind(wx.EVT_MOTION, self.displayInfo)
@@ -175,11 +187,14 @@ class SelectFiles(wx.Frame):
         sys.exit()
 
     def displayInfo(self, event):
+        # figure out if can make this stay a bit longer global tooltip length
+        wx.ToolTip.SetAutoPop(300000)
         self.InfoIcon.SetToolTip("Click images on the left to preview them. Click 'Select Image' to mark an image for "
                                  "anonymization, and 'Label PreOp' or 'Label PostOp' to label the image. If you'd like "
                                  "to change your selection, choose an image on the right and click 'Deselect Image'. "
                                  "Once you are satisfied with your selections, Click 'Anonymize Selected' to go to the "
                                  "next step")
+
 
 
     def showUnusedFiles(self):
@@ -252,7 +267,8 @@ class SelectFiles(wx.Frame):
             if (os.path.basename(os.path.normpath(dcmObject.filename)) == imgName):
                 self.CurrentDICOMObject = dcmObject
 
-
+        #fill date string here
+        self.xrayDate.SetLabel(self.CurrentDICOMObject.AcquisitionDate)
 
         from matplotlib import pyplot
         pyplot.imshow(self.CurrentDICOMObject.pixel_array, cmap=pyplot.cm.bone)
@@ -303,7 +319,7 @@ class SelectFiles(wx.Frame):
         if not self.selectImage.IsShown():
             self.selectImage.Show()
         self.classifyPreop.Show()
-        self.classifyPostop.Show()
+        #self.classifyPostop.Show()
         self.deselectImageButton.Show()
 
         #for rlb in self.RightPatientFileLists:
@@ -454,6 +470,7 @@ class AnonymizeFiles(wx.Frame):
 
         self.Maximize(True)
         self.WindowSize = self.GetSize()
+        self.SetSizeHints(self.WindowSize[0], self.WindowSize[1])
         self.parent = self.GetParent()
 
         # LOGIC ATTRIBUTES
@@ -546,8 +563,6 @@ class AnonymizeFiles(wx.Frame):
 
     def exportSelected(self, event):
 
-
-
         dest=""
         dialog = wx.DirDialog(self, "Choose or Create Destination Folder", dest)
         if dialog.ShowModal() == wx.ID_OK:
@@ -563,7 +578,7 @@ class AnonymizeFiles(wx.Frame):
                 fileString = str(lb.GetString(item))
                 for ds in curr_patient.usedFiles:
                     if os.path.basename(os.path.normpath(ds.filename)) == fileString.split("$")[0]:
-                        ds.save_as(str(os.path.join(dest,fileString)))
+                        ds.save_as(str(os.path.join(dest,fileString.split("$")[0])))
 
         dlg = wx.MessageDialog(self, 'Files Exported, the program can be closed now', '', wx.OK | wx.ICON_INFORMATION)
         val = dlg.ShowModal()
@@ -745,5 +760,5 @@ def createLibrary():
 
 if __name__ == "__main__":
     app = wx.App()
-    SelectFolderDialog(None, title="Select DICOM Directory")
+    SelectFolderDialog(None, title="Select DICOM Directory", style= wx.DEFAULT_FRAME_STYLE & ~(wx.RESIZE_BORDER | wx.MAXIMIZE_BOX))
     app.MainLoop()
