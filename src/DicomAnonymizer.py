@@ -117,7 +117,14 @@ class SelectFiles(wx.Frame):
         self.classifyPostop = wx.Button(self.imagePanel, pos=(598, 570), label="Label Post-Op")
         '''
 
-        self.selectImage = wx.Button(self.panel, pos=(self.WindowSize[0]/2, 520), label="Select Image")
+        self.selectImage = wx.Button(self.panel, pos=(self.WindowSize[0]/2 - 75, 520), label="Select Image")
+        self.deselectImageButton = wx.Button(self.panel, pos=(self.WindowSize[0]/2 + 25, 520), label="Deselect Image")
+
+        self.chooseLabel = wx.ComboBox(self.panel, pos=(self.WindowSize[0]/2 -100, 580), choices=["Pre-Op",
+                                       "6 weeks Post-Op", "3 months Post-Op", "6 months Post-Op", "1 year Post-Op", "5 years Post-Op"])
+        self.setLabelButton = wx.Button(self.panel, pos=(self.WindowSize[0]/2 + 75, 582), label="Set Label")
+
+        '''
         self.classifyPreop = wx.Button(self.panel, pos=(self.WindowSize[0]/2, 550), label="Pre-Op")
 
         self.classifyPostop6wk = wx.Button(self.panel, pos =(self.WindowSize[0]/2 -250, 580), label="6wk Post-Op")
@@ -125,23 +132,26 @@ class SelectFiles(wx.Frame):
         self.classifyPostop6mth = wx.Button(self.panel, pos =(self.WindowSize[0]/2 -50, 580), label="6mth Post-Op")
         self.classifyPostop1yr = wx.Button(self.panel, pos =(self.WindowSize[0]/2 +50, 580), label="1yr Post-Op")
         self.classifyPostop5yr = wx.Button(self.panel, pos =(self.WindowSize[0]/2 +150, 580), label="5yr Post-Op")
+        '''
 
-        self.deselectImageButton = wx.Button(self.panel, pos=(self.WindowSize[0]/2 -5, 610), label="Deselect Image")
         self.anonSelected = wx.Button(self.panel, pos=(self.WindowSize[0]*.83, self.WindowSize[1]*0.9), label="Anonymize Selected")
         self.InfoIcon = wx.StaticBitmap(self.imagePanel, bitmap=(wx.ArtProvider.GetBitmap(wx.ART_HELP)))
 
         # Hide/Show Buttons
         self.selectImage.Hide()
-        self.classifyPreop.Hide()
+        #self.classifyPreop.Hide()
         #self.classifyPostop.Hide()
         self.deselectImageButton.Hide()
+        self.chooseLabel.Hide()
+        self.setLabelButton.Hide()
         self.anonSelected.Show()
 
         # EVENT HANDLERS
         self.selectImage.Bind(wx.EVT_BUTTON, self.chooseImage)
-        self.classifyPreop.Bind(wx.EVT_BUTTON, self.markPreop)
+        #self.classifyPreop.Bind(wx.EVT_BUTTON, self.markPreop)
         #self.classifyPostop.Bind(wx.EVT_BUTTON, self.markPostop)
         self.deselectImageButton.Bind(wx.EVT_BUTTON, self.deselectImage)
+        self.setLabelButton.Bind(wx.EVT_BUTTON, self.setLabel)
         self.anonSelected.Bind(wx.EVT_BUTTON, self.nextScreen)
         self.InfoIcon.Bind(wx.EVT_MOTION, self.displayInfo)
 
@@ -210,12 +220,22 @@ class SelectFiles(wx.Frame):
             fileNames = []
             lb = wx.ListBox(self.leftPanel, size=(self.WindowSize[0] / 4 - 50, 100), choices=fileNames)
             for f in files:
+                set = False
+                for lst in value.fileLabels:
+                    if f in lst:
+                        lb.Append(os.path.basename(os.path.normpath(f.filename)) + '$' + lst[1], value)
+                        set = True
+                if not set:
+                    lb.Append(os.path.basename(os.path.normpath(f.filename)), value)
+
+                '''
                 if f in value.preopFiles:
                     lb.Append(os.path.basename(os.path.normpath(f.filename))+'$preop', value)
                 elif f in value.postopFiles:
                     lb.Append(os.path.basename(os.path.normpath(f.filename))+'$postop', value)
                 else:
                     lb.Append(os.path.basename(os.path.normpath(f.filename)), value)
+                '''
             self.LeftPatientFileLists.append(lb)
 
             lb.Bind(wx.EVT_LISTBOX, self.displayImage)
@@ -242,12 +262,21 @@ class SelectFiles(wx.Frame):
             rlb = wx.ListBox(self.rightPanel, size=(self.WindowSize[0] / 4 - 50, 100), choices=fileNames)
             # rlb = wx.ListBox(self.panel, pos=(950, ((count * 125) + 30)), size=(300, 100), choices=fileNames)
             for f in files:
+                set = False
+                for lst in value.fileLabels:
+                    if f in lst:
+                        rlb.Append(os.path.basename(os.path.normpath(f.filename))+'$'+lst[1], value)
+                        set = True
+                if not set:
+                    rlb.Append(os.path.basename(os.path.normpath(f.filename)), value)
+
+                '''
                 if f in value.preopFiles:
                     rlb.Append(os.path.basename(os.path.normpath(f.filename))+'$preop', value)
                 elif f in value.postopFiles:
                     rlb.Append(os.path.basename(os.path.normpath(f.filename))+'$postop', value)
-                else:
-                    rlb.Append(os.path.basename(os.path.normpath(f.filename)), value)
+                '''
+
             self.RightPatientFileLists.append(rlb)
             rlb.Bind(wx.EVT_LISTBOX, self.displayImage)
 
@@ -318,7 +347,9 @@ class SelectFiles(wx.Frame):
             self.xrayImage.Destroy()
         if not self.selectImage.IsShown():
             self.selectImage.Show()
-        self.classifyPreop.Show()
+        self.chooseLabel.Show()
+        self.setLabelButton.Show()
+        #self.classifyPreop.Show()
         #self.classifyPostop.Show()
         self.deselectImageButton.Show()
 
@@ -327,6 +358,19 @@ class SelectFiles(wx.Frame):
 
 
         self.xrayImage = wx.StaticBitmap(self.panel, -1, png, (self.WindowSize[0]/2 -250, 10), (500, 500))
+
+    def setLabel(self, event):
+        set = False
+        for lst in self.CurrentPatient.fileLabels:
+            if self.CurrentDICOMObject in lst:
+                lst[1] = self.chooseLabel.GetValue()
+                set = True
+        if not set:
+            self.CurrentPatient.fileLabels.append([self.CurrentDICOMObject, self.chooseLabel.GetValue()])
+
+        self.reprintFiles()
+
+
 
     def markPreop(self, event):
         # if the current file is already mark post op, remove it from that list

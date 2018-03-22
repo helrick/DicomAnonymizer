@@ -19,6 +19,7 @@ class Patient(PatientLibrary):
         self.unusedFiles = [dcmObject]
         self.usedFiles = []
 
+        self.fileLabels = []
         self.preopFiles = []
         self.postopFiles = []
         
