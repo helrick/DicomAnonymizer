@@ -678,12 +678,21 @@ class AnonymizeFiles(wx.Frame):
             if(files):
                 rlb = wx.CheckListBox(self.filePanel, size=(self.WindowSize[0] / 4 - 50, 100), choices=fileNames)
                 for f in files:
+                    set = False
+                    for lst in value.fileLabels:
+                        if f in lst:
+                            rlb.Append(os.path.basename(os.path.normpath(f.filename)) + '$' + lst[1], value)
+                            set = True
+                    if not set:
+                        rlb.Append(os.path.basename(os.path.normpath(f.filename)), value)
+                    '''
                     if f in value.preopFiles:
                         rlb.Append(os.path.basename(os.path.normpath(f.filename)) + '$preop', value)
                     elif f in value.postopFiles:
                         rlb.Append(os.path.basename(os.path.normpath(f.filename)) + '$postop', value)
                     else:
                         rlb.Append(os.path.basename(os.path.normpath(f.filename)), value)
+                        '''
                 self.SelectedPatientFiles.append(rlb)
                 rlb.Bind(wx.EVT_LISTBOX, self.displayImageInfo)
 
