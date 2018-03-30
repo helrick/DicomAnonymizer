@@ -300,8 +300,19 @@ class SelectFiles(wx.Frame):
         self.xrayDate.SetLabel(self.CurrentDICOMObject.AcquisitionDate)
 
         from matplotlib import pyplot
-        pyplot.imshow(self.CurrentDICOMObject.pixel_array, cmap=pyplot.cm.bone)
-        pyplot.axis('off')
+        try:
+            pyplot.imshow(self.CurrentDICOMObject.pixel_array, cmap=pyplot.cm.bone)
+            pyplot.axis('off')
+        except:
+            if not self.selectImage.IsShown():
+                self.selectImage.Show()
+            self.chooseLabel.Show()
+            self.setLabelButton.Show()
+            # self.classifyPreop.Show()
+            # self.classifyPostop.Show()
+            self.deselectImageButton.Show()
+            print 'unable to display images of this type'
+            return
         
         import tempfile
         from base64 import b64encode
@@ -367,6 +378,10 @@ class SelectFiles(wx.Frame):
                 set = True
         if not set:
             self.CurrentPatient.fileLabels.append([self.CurrentDICOMObject, self.chooseLabel.GetValue()])
+
+        self.chooseImage(event)
+
+
 
         self.reprintFiles()
 
