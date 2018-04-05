@@ -19,27 +19,18 @@ class Patient(PatientLibrary):
         self.unusedFiles = [dcmObject]
         self.usedFiles = []
 
+        #used to store the labels associated to files
         self.fileLabels = []
 
-        
         #initialize the Patient data attributes to be anonymized
         self.unAnon_PatientsName = dcmObject.PatientsName
         self.unAnon_PatientBday = dcmObject.PatientBirthDate
         self.sessionDate = dcmObject.AcquisitionDate
 
-    #TODO: delete?
-    #only pass if the file has been confirmed to have the same patient name
-    def addFile(self, filePath):
-        #create a dcmObject from the filepath using the pydicom library
-        ds = dicom.read_file(filePath)
-        
-        #extra check to ensure incorrect filePath hasn't been passed
-        if (ds.PatientsName == self.unAnon_PatientsName):
-            self.unusedFiles.append(ds)
-        else:
-            raise SystemError('Attempted to add .dcm file not belonging to patient')
 
     #TODO: remove addFile function if this works
+
+
     def add_dicomObject(self, dicomObject):
         # extra check to ensure incorrect object hasn't been passed
         if (dicomObject.PatientsName == self.unAnon_PatientsName):

@@ -398,10 +398,9 @@ class PatientLibrary():
             for filename in filenames:
                 filePath = os.path.join(root, filename)
                 mime = magic.Magic(mime=True)
-                type = mime.from_file(filePath)
 
-                #determines MIME file type with magic library
-                #type = magic.from_file(filePath)
+                #determines the mime type of every file
+                type = mime.from_file(filePath)
 
                 #creates pydicom object for all files
                 #with MIME type of DICOM

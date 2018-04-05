@@ -632,12 +632,17 @@ class AnonymizeFiles(wx.Frame):
 
         for lb in self.SelectedPatientFiles:
             # get the patient from the first checked image value
-            curr_patient = (lb.GetClientData(lb.GetCheckedItems()[0]))
-            for item in lb.GetCheckedItems():
-                fileString = str(lb.GetString(item))
-                for ds in curr_patient.usedFiles:
-                    if os.path.basename(os.path.normpath(ds.filename)) == fileString.split("$")[0]:
-                        ds.save_as(str(os.path.join(dest,fileString.split("$")[0])))
+            try:
+                curr_patient = (lb.GetClientData(lb.GetCheckedItems()[0]))
+                for item in lb.GetCheckedItems():
+                    fileString = str(lb.GetString(item))
+                    for ds in curr_patient.usedFiles:
+                        if os.path.basename(os.path.normpath(ds.filename)) == fileString.split("$")[0]:
+                            ds.save_as(str(os.path.join(dest, fileString.split("$")[0])))
+            except:
+                # no files from this listbox selected
+                pass
+
 
         dlg = wx.MessageDialog(self, 'Files Exported, the program can be closed now', '', wx.OK | wx.ICON_INFORMATION)
         val = dlg.ShowModal()
