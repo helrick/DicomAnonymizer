@@ -59,34 +59,5 @@ class Patient(PatientLibrary):
             #must export for changes to take effect
             for dcmObject in self.usedFiles:
                 dcmObject.PatientsName = newPatientsName
-        
-        #XXX: if anonymize in place is implemented later, this would be the spot, using:
-        '''
-        if anonymizeSource:
-            for dcmObject in unusedFiles:
-                dcmObject.PatientsName = newPatientsName
-            #must also change other tags and export to source (overwriting originals)
-        '''
 
 
-
-
-
-    #TODO: write this, comment out for now since errors
-    '''
-    def anonymizeUsedFiles(self):
-        #TODO: write code for anonymization of all tags
-        #first implement with obvious ones,
-        #then use DICOM PS3.15 2017e Attribute Confidentiality Profiles
-        for dcmObject in self.usedFiles:
-            #go through each tag that needs to be anonymized on every object
-        
-        
-    '''
-
-def main():
-    print "here"
-    #nothing here
-
-if __name__ == "__main__":
-    main()

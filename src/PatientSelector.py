@@ -33,8 +33,6 @@ class PatientLibrary():
                          'RequestAttributesSequence': '#'}
         '''
 
-
-
         self.tagsAnon = {(0x0008, 0x0050): '00000000',
                          (0x0010, 0x0020): '100000',
                          (0x0010, 0x1040): 'Anonymized',
@@ -45,11 +43,11 @@ class PatientLibrary():
                          (0x0010, 0x0030) : '00000101'
                          }
 
-
         '''Overkill Tags according to DICOM standard'''
-        self.tagsAnon = {(0x0008, 0x0050) : '00000000',
-                         (0x0018, 0x4000) : '#',
-                         (0x0040, 0x0555) : '#',
+        self.tagsAnon = {
+                            (0x0008, 0x0050) : '00000000',
+                            (0x0018, 0x4000) : '#',
+                            (0x0040, 0x0555) : '#',
                             (0x0008, 0x0022) : '00000000',
                             (0x0008, 0x002A) : '#',
                             (0x0018, 0x1400) : '#',
@@ -357,27 +355,6 @@ class PatientLibrary():
                               '(0088, 0906)', '(0088, 0904)', '(0062, 0021)', '(0008, 1195)', '(0040, A124)', '(0040, A352)',
                               '(0040, A358)', '(0040, A088)', '(0040, A075)', '(0040, A073)', '(0040, A027)', '(0038, 4000)']
 
-        # so far just the A's
-        self.additionalTags = {'AccessionNumber': '00000000',
-                          'AcquisitionComments': '#',
-                          'AcquisitionContextSequence': '#',
-                          'AcquisitionDate': '#',
-                          'AcquisitionDateTime': '#',
-                          'AcquisitionDeviceProcessingDescr': '#',
-                          'AcquisitionProtocolDescription': '#',
-                          'AcquisitionTime': '#',
-                          'ActualHumanPerformersSequence': '#',
-                          'AdditionalPatientHistory': '#',
-                          'AddressTrial': '#',
-                          'AdmissionID': '#',
-                          'AdmittingDate': '#',
-                          'AdmittingDiagnosesDescription': '#',
-                          'AdmittingDiagnosesCodeSequence': '#',
-                          'AdmittingTime': '#',
-                          'Allergies': '#',
-                          'Arbitrary': '#',
-                          'AuthorObserverSequence': '#'
-                          }
 
     '''
     Iterates through the files in the source directory,
@@ -404,9 +381,9 @@ class PatientLibrary():
 
                 #creates pydicom object for all files
                 #with MIME type of DICOM
-                fileValid = True
-                if type == 'application/dicom':
 
+                if type == 'application/dicom':
+                    fileValid = True
                     ds = dicom.read_file(filePath)
                     try:
                         pName = ds.PatientsName
@@ -427,9 +404,6 @@ class PatientLibrary():
                             self.PatientObjects[pIdent] = patient
 
     def basicAnonymizeLibrary(self):
-
-
-
         # iterate through every patient in library
         idCount = 100000
         for name, patient in self.PatientObjects.iteritems():
@@ -439,44 +413,19 @@ class PatientLibrary():
 
             # iterate through every dicom file selected for anonymization
             for ds in patient.usedFiles:
-
-                '''
-                tagname = "PatientID"
-                print ds.data_element(tagname).value
-                del ds[0x10,0x1040]
-                try:
-                    ds[0x10,0x1040].value = 'Unknown'
-                except KeyError:
-                    print 'Tag Do not exist'
-                '''
-
                 for tag, value in self.tagsAnon.iteritems():
                     if value == '#':
                         try:
-                            #x = ds[tag]
-                            #print x
-                            #x = ds.data_element(tag).tag
                             del ds[tag]
                         except:
                             # the tag didn't exist in the first place
                             pass
                     else:
                         try:
-                            #print ds[tag]
                             ds[tag].value = value
-                            #ds.data_element(tag).value = value
                         except:
                             # tag didn't exist
                             pass
-
-                ''''
-                print ds[0x10,0x1040]
-                print ds.data_element("PatientAddress").value
-                ds.data_element("PatientAddress").value = 'Unknown'
-                print ds.data_element("AccessionNumber").value
-                ds.data_element("AccessionNumber").value = '00000000'
-                '''
-
 
     def testLibrary(self):
         import os.path
@@ -486,14 +435,13 @@ class PatientLibrary():
                 print os.path.basename(os.path.normpath(f.filename))
 
 
-
 def main():
-
-    #to test
+    # for CLI
     path = input("Enter dir path: ")
     pLib = PatientLibrary(path)
     pLib.populatePatientLibrary()
     pLib.testLibrary()
+
 
 if __name__ == "__main__":
     main()
