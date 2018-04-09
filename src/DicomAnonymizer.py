@@ -186,6 +186,7 @@ class SelectFiles(wx.Frame):
         self.LeftPatientText = []
         self.LeftPatientFileLists = []
         global patientLib
+
         for name, value in patientLib.PatientObjects.iteritems():
             pName = value.unAnon_PatientsName
             self.LeftPatientText.append(wx.StaticText(self.leftPanel, label=pName))
@@ -483,15 +484,20 @@ class AnonymizeFiles(wx.Frame):
                     for ds in curr_patient.usedFiles:
                         if os.path.basename(os.path.normpath(ds.filename)) == fileString.split("$")[0]:
                             ds.save_as(str(os.path.join(dest, fileString.split("$")[0])))
+
+                dlg = wx.MessageDialog(self, 'Files Exported, the program can be closed now', '',
+                                       wx.OK | wx.ICON_INFORMATION)
+                val = dlg.ShowModal()
+                dlg.Show()
             except:
                 # no files from this listbox selected
                 pass
 
+
+
         # TODO: ensure file actually exported before displaying success message
 
-        dlg = wx.MessageDialog(self, 'Files Exported, the program can be closed now', '', wx.OK | wx.ICON_INFORMATION)
-        val = dlg.ShowModal()
-        dlg.Show()
+
 
         dialog.Destroy()
 
